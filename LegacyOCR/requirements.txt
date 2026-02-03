@@ -1,0 +1,43 @@
+# OCR Scanner 依存パッケージ
+
+# CLI
+click>=8.1.0
+
+# 設定ファイル
+pyyaml>=6.0
+
+# 画像処理
+Pillow>=10.0.0
+opencv-python>=4.8.0
+
+# PDF処理
+PyPDF2>=3.0.0
+pdf2image>=1.16.0
+
+# OCR（Phase 1）
+# Google Cloud Vision API
+google-cloud-vision>=3.4.0
+# Azure Computer Vision（オプション）
+# azure-cognitiveservices-vision-computervision>=0.9.0
+# Tesseract（フォールバック）
+pytesseract>=0.3.10
+
+# 日本語処理（Phase 1）
+# SudachiPy（推奨）
+# sudachipy>=0.6.0
+# sudachidict-core>=20230110
+
+# Web取得（Phase 3 - 将来）
+# requests>=2.31.0
+# playwright>=1.40.0
+# beautifulsoup4>=4.12.0
+# lxml>=4.9.0
+
+# LLM API（Phase 4 - 将来）
+# openai>=1.0.0
+# groq>=0.4.0
+# anthropic>=0.7.0
+
+# テスト
+pytest>=7.4.0
+pytest-cov>=4.1.0

@@ -1,0 +1,183 @@
+doc_type: ad_spec_standard
+display_name: 標準的な広告仕様書
+description: >
+  広告主名、媒体名、キャンペーン概要、スケジュール、予算、KPI、クリエイティブ仕様などを含む標準的な広告仕様書。
+
+sections:
+  - id: header
+    label: ヘッダー
+    start_keywords:
+      - "広告出稿仕様書"
+      - "デジタル広告出稿仕様書"
+      - "媒体仕様書"
+      - "媒体資料"
+      - "広告主名"
+      - "広告主"
+      - "クライアント"
+      - "Client"
+      - "Advertiser"
+      - "案件名"
+      - "キャンペーン名"
+    end_keywords:
+      - "キャンペーン概要"
+      - "出稿概要"
+      - "案件概要"
+      - "実施概要"
+      - "概要"
+      - "ターゲット"
+      - "配信ターゲット"
+    layout_hint: key_value
+    fields:
+      - id: advertiser
+        label: 広告主名
+        match_keywords: ["広告主名", "広告主", "クライアント", "Client", "Advertiser"]
+        value_position: right_same_line
+      - id: brand
+        label: ブランド
+        match_keywords: ["ブランド", "Brand"]
+        value_position: right_same_line
+      - id: product
+        label: 商品名／案件名
+        match_keywords: ["商品名", "案件名", "キャンペーン名", "Product", "Campaign"]
+        value_position: right_same_line
+      - id: media
+        label: 媒体名
+        match_keywords: ["媒体名", "媒体", "Media"]
+        value_position: right_same_line
+      - id: agency
+        label: 代理店
+        match_keywords: ["代理店", "Agency"]
+        value_position: right_same_line
+      - id: contact
+        label: 担当者
+        match_keywords: ["担当者", "ご担当者", "Contact"]
+        value_position: right_same_line
+
+  - id: campaign_overview
+    label: キャンペーン概要
+    start_keywords:
+      - "キャンペーン概要"
+      - "出稿概要"
+      - "案件概要"
+      - "実施概要"
+      - "目的"
+      - "キャンペーン目的"
+      - "Objectives"
+    end_keywords:
+      - "ターゲット"
+      - "配信ターゲット"
+      - "想定ユーザー"
+      - "スケジュール"
+      - "配信期間"
+      - "期間"
+    layout_hint: paragraph
+
+  - id: targeting
+    label: ターゲット
+    start_keywords:
+      - "ターゲット"
+      - "配信ターゲット"
+      - "ターゲットユーザー"
+      - "想定ユーザー"
+      - "想定オーディエンス"
+      - "Audience"
+      - "ターゲット属性"
+    end_keywords:
+      - "KPI"
+      - "ゴール"
+      - "目標指標"
+      - "成果指標"
+    layout_hint: bullet_list
+
+  - id: kpi
+    label: KPI
+    start_keywords:
+      - "KPI"
+      - "ゴール"
+      - "目標指標"
+      - "成果指標"
+      - "評価指標"
+      - "主要KPI"
+    end_keywords:
+      - "スケジュール"
+      - "配信期間"
+      - "媒体プラン"
+      - "メディアプラン"
+      - "出稿スケジュール"
+    layout_hint: bullet_list
+
+  - id: schedule
+    label: スケジュール／媒体プラン
+    start_keywords:
+      - "スケジュール"
+      - "出稿スケジュール"
+      - "掲載スケジュール"
+      - "放送スケジュール"
+      - "配信期間"
+      - "媒 体 プ ラ ン"
+      - "媒体プラン"
+      - "メディアプラン"
+      - "媒体・メニュー一覧"
+      - "配信プラン"
+      - "配信メニュー"
+    end_keywords:
+      - "クリエイティブ仕様"
+      - "入稿仕様"
+      - "入稿条件"
+      - "広告素材仕様"
+      - "バナー仕様"
+      - "動画仕様"
+    layout_hint: table_like
+    column_keywords:
+      - ["期間", "配信期間", "期間", "実施期間"]
+      - ["媒体", "メディア", "媒体名", "枠名"]
+      - ["メニュー", "商品名", "枠内容", "メニュー名", "プラン名"]
+      - ["予算", "金額", "Cost", "Budget", "出稿金額", "想定費用"]
+      - ["想定IMP", "IMP", "インプレッション", "表示回数"]
+      - ["想定クリック", "Click", "CTR", "クリック数"]
+      - ["想定CV", "CV", "CVR", "コンバージョン"]
+
+  - id: creative_spec
+    label: クリエイティブ仕様
+    start_keywords:
+      - "クリエイティブ仕様"
+      - "広告素材仕様"
+      - "入稿仕様"
+      - "入稿条件"
+      - "入稿仕様書"
+      - "バナー仕様"
+      - "動画仕様"
+      - "クリエイティブ条件"
+    end_keywords:
+      - "注意事項"
+      - "備考"
+      - "その他"
+      - "留意事項"
+    layout_hint: key_value_or_bullet
+    fields:
+      - id: format
+        label: フォーマット
+        match_keywords: ["フォーマット", "Format", "フォーマット種別"]
+      - id: size
+        label: サイズ
+        match_keywords: ["サイズ", "Size", "画面サイズ", "pixel", "px"]
+      - id: length
+        label: 長さ
+        match_keywords: ["秒数", "Length", "Duration", "尺", "再生時間"]
+      - id: file_type
+        label: ファイル形式
+        match_keywords: ["ファイル形式", "File type", "拡張子", "データ形式"]
+
+  - id: notes
+    label: 注意事項・備考
+    start_keywords:
+      - "注意事項"
+      - "備考"
+      - "その他"
+      - "留意事項"
+      - "備考欄"
+      - "注意書き"
+    end_keywords: []
+    layout_hint: paragraph
+
+

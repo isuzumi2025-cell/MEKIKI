@@ -1,0 +1,96 @@
+# Webコネクタ設定ファイル（Phase 3用）
+# このファイルを connectors.yaml にコピーして使用してください
+
+# コネクタ定義
+connectors:
+  # 例: 公開ページ
+  - name: "example_public"
+    target_url: "https://example.com/page"
+    auth_type: "none"  # none|basic|form|password_gate
+    method: "html"  # html|screenshot|pdf
+    
+    # HTML抽出設定
+    html:
+      enabled: true
+      selectors:
+        main_content: "main, article, .content"
+        exclude: "script, style, nav, footer"
+    
+    # スクリーンショット設定（method=screenshotの場合）
+    screenshot:
+      enabled: false
+      viewport:
+        width: 1920
+        height: 1080
+      wait_for: "networkidle"  # networkidle|load|domcontentloaded
+      full_page: true
+    
+    # リトライ設定
+    retry:
+      max_attempts: 3
+      backoff_factor: 2.0
+      timeout: 30
+  
+  # 例: Basic認証
+  - name: "example_basic"
+    target_url: "https://example.com/secure"
+    auth_type: "basic"
+    basic_auth:
+      username: "${BASIC_AUTH_USERNAME}"  # 環境変数から取得
+      password: "${BASIC_AUTH_PASSWORD}"
+    method: "html"
+  
+  # 例: フォームログイン
+  - name: "example_form_login"
+    target_url: "https://example.com/login"
+    auth_type: "form"
+    form_login:
+      login_url: "https://example.com/login"
+      username_selector: "#username"
+      password_selector: "#password"
+      submit_selector: "button[type='submit']"
+      csrf_selector: "input[name='csrf_token']"  # オプション
+      post_login_url: "https://example.com/dashboard"  # ログイン後のURL
+      wait_after_login: 2.0  # 秒
+    method: "screenshot"
+    screenshot:
+      enabled: true
+      wait_for: "networkidle"
+  
+  # 例: パスワード入力型（単一パスワード）
+  - name: "example_password_gate"
+    target_url: "https://example.com/dev"
+    auth_type: "password_gate"
+    password_gate:
+      password: "${PASSWORD_GATE_KEY}"  # 環境変数から取得
+      password_selector: "input[type='password']"
+      submit_selector: "button[type='submit'], input[type='submit']"
+      wait_after_submit: 2.0
+    method: "screenshot"
+    screenshot:
+      enabled: true
+      wait_for: "networkidle"
+      full_page: true
+
+# グローバル設定
+global:
+  # User-Agent
+  user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+  
+  # タイムアウト（秒）
+  timeout: 30
+  
+  # レート制限（リクエスト/秒）
+  rate_limit: 1.0
+  
+  # robots.txtを尊重するか
+  respect_robots: true
+  
+  # Cookie保持
+  cookie_jar: true
+  
+  # プロキシ設定（オプション）
+  proxy:
+    enabled: false
+    http: ""
+    https: ""

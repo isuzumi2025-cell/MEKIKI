@@ -1,0 +1,33 @@
+# Web vs PDF 整合性検証システム - 依存関係
+# Python 3.9+
+
+# ===== GUI =====
+customtkinter>=5.0.0
+Pillow>=10.0.0
+
+# ===== Webクローリング =====
+playwright>=1.40.0
+
+# ===== PDF処理 =====
+PyMuPDF>=1.23.0  # fitz
+
+# ===== 画像処理 =====
+opencv-python>=4.8.0
+numpy>=1.24.0
+
+# ===== Google Cloud =====
+google-cloud-vision>=3.5.0
+gspread>=5.12.0
+google-auth>=2.25.0
+
+# ===== OCR（オプション）=====
+# pytesseract>=0.3.10  # ローカルOCR使用時
+
+# ===== ユーティリティ =====
+python-dotenv>=1.0.0
+
+# ===== 開発ツール（オプション）=====
+# black>=23.0.0
+# flake8>=6.0.0
+# pytest>=7.4.0
+

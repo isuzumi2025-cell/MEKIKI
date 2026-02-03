@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "run_id": "20260109_215848",
+    "start_url": "https://example.com",
+    "timestamp": "2026-01-09T21:58:51.730397",
+    "total_pages": 1
+  },
+  "nodes": [
+    {
+      "id": "c984d06aafbecf6bc55569f964148ea3",
+      "url": "https://example.com",
+      "title": "Example Domain",
+      "status": 200,
+      "screenshot": "images/c984d06aafbecf6bc55569f964148ea3.png",
+      "links": [],
+      "links_count": 1
+    }
+  ],
+  "edges": []
+}

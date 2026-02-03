@@ -1,0 +1,67 @@
+Metadata-Version: 2.4
+Name: sitemap-pro
+Version: 0.2.0
+Summary: High-reproducibility web crawler with visual sitemap generation
+License: MIT
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: playwright>=1.40.0
+Requires-Dist: pydantic>=2.0.0
+Requires-Dist: pydantic-settings>=2.0.0
+Requires-Dist: httpx>=0.26.0
+Requires-Dist: tenacity>=8.0.0
+Requires-Dist: Pillow>=10.0.0
+Provides-Extra: dev
+Requires-Dist: pytest>=8.0.0; extra == "dev"
+Requires-Dist: pytest-asyncio>=0.23.0; extra == "dev"
+
+# Sitemap Pro (MVP)
+
+A reproducible crawl report generator. Creates a visual sitemap with full-page screenshots and metadata.
+
+## Setup
+
+1.  **Install Dependencies**:
+    ```bash
+    pip install -r requirements.txt
+    playwright install chromium
+    ```
+
+2.  **Configuration**:
+    -   Edit `.env` (create if missing, see `.env.example`) to set `START_URL`, `MAX_PAGES`, etc.
+    -   Default: `https://example.com`, 50 pages.
+
+## Usage
+
+### 1. Basic Crawl
+Crawls the site and saves data + images to `outputs/{run_id}/`.
+```bash
+python run_mvp.py --url https://example.com --max-pages 50
+```
+
+### 2. Authenticated Crawl
+**Form Login:**
+```bash
+python run_mvp.py --url https://example.com/dashboard --auth-type form \
+    --login-url https://example.com/login \
+    --auth-user "myuser" --auth-pass "mypass"
+```
+**Cookie Injection:**
+Add cookies to `.env` or modify `config.py` directly for complex cookie objects.
+
+### 3. Generate & View Report
+Reports are automatically generated after the crawl.
+Open `outputs/{run_id}/report/index.html` in your browser.
+
+## Expected Output
+- **Console**: Progress logs (Processing X/Y...).
+- **Directory**: `outputs/{run_id}/`
+  - `data.json`: Graph data and metadata.
+  - `crawl.log`: Execution log.
+  - `images/`: Full screenshots + thumbnails.
+  - `report/`: Static HTML report for viewing.
+
+## Features (MVP)
+-   **Crawler**: Async Playwright, BFS traversal, Screenshot capture.
+-   **Report**: Interactive Network Graph (Cytoscape.js), Sidebar details.
+-   **Safety**: Headless mode, Domain restriction, robots.txt compliance (default: ON).

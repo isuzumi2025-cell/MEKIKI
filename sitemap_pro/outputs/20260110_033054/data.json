@@ -1,0 +1,505 @@
+{
+  "meta": {
+    "run_id": "20260110_033054",
+    "start_url": "https://www.portcafe.net/demo/jrkyushu/jisha-meguri/",
+    "timestamp": "2026-01-10T03:31:01.241824",
+    "total_pages": 1
+  },
+  "config": {
+    "START_URL": "https://www.portcafe.net/demo/jrkyushu/jisha-meguri/",
+    "ALLOWED_DOMAINS": [
+      "example.com"
+    ],
+    "MAX_PAGES": 10,
+    "CONCURRENCY": 4,
+    "HEADLESS": true,
+    "TIMEOUT_SECONDS": 30,
+    "WAIT_FOR_SELECTOR": "body",
+    "USER_AGENT": "SitemapPro/0.1.0 (Compatible; Playwright)",
+    "RESPECT_ROBOTS": true,
+    "REQUEST_DELAY": 0.0,
+    "AUTH_TYPE": "basic",
+    "AUTH_USER": "jrq",
+    "AUTH_PASS": "***",
+    "LOGIN_URL": "",
+    "AUTH_SELECTORS": {
+      "user": "#username",
+      "pass": "#password",
+      "submit": "button[type='submit']"
+    },
+    "COOKIES": "***",
+    "OUTPUT_DIR": "outputs"
+  },
+  "nodes": [
+    {
+      "id": "589ca86daa3972453c88f789130afb08",
+      "url": "https://www.portcafe.net/demo/jrkyushu/jisha-meguri",
+      "title": "九州寺社めぐり 駅長がおすすめする寺社を紹介！｜JR九州",
+      "status": 200,
+      "screenshot": "images/589ca86daa3972453c88f789130afb08.png",
+      "thumbnail": "images/589ca86daa3972453c88f789130afb08_thumb.png",
+      "h1": "\n        \n          \n        \n      ",
+      "meta_desc": "",
+      "canonical": "https://www.portcafe.net/demo/jrkyushu/jisha-meguri/",
+      "links": [],
+      "links_count": 8
+    }
+  ],
+  "edges": [
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "ca3d11f72044ff3e37b4968460618270",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "ca3d11f72044ff3e37b4968460618270",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "aedb48677b7ef687b2daf0fe248b8d15",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "5025e4cafaf46ba34ed0c208f4db1c73",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "08074c86b747adb5b730539be6a9814c",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "de6bcc5ea2fc98a6d1ce7b7b73c750ad",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "5010812b6d77578c7da67ffd8e1b5ebb",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "5010812b6d77578c7da67ffd8e1b5ebb",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "5010812b6d77578c7da67ffd8e1b5ebb",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "5025e4cafaf46ba34ed0c208f4db1c73",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "1b498397ccdc6918dcae551f2ebf7ada",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "e174f03314b8ca77bff08c7486ccd4d5",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "e174f03314b8ca77bff08c7486ccd4d5",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "e174f03314b8ca77bff08c7486ccd4d5",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "e174f03314b8ca77bff08c7486ccd4d5",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "e174f03314b8ca77bff08c7486ccd4d5",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "e174f03314b8ca77bff08c7486ccd4d5",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "1b498397ccdc6918dcae551f2ebf7ada",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "1b498397ccdc6918dcae551f2ebf7ada",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "1b498397ccdc6918dcae551f2ebf7ada",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "1b498397ccdc6918dcae551f2ebf7ada",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "1b498397ccdc6918dcae551f2ebf7ada",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "1b498397ccdc6918dcae551f2ebf7ada",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "1b498397ccdc6918dcae551f2ebf7ada",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "1b498397ccdc6918dcae551f2ebf7ada",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "1b498397ccdc6918dcae551f2ebf7ada",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "1b498397ccdc6918dcae551f2ebf7ada",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "1b498397ccdc6918dcae551f2ebf7ada",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "1b498397ccdc6918dcae551f2ebf7ada",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "1b498397ccdc6918dcae551f2ebf7ada",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "1b498397ccdc6918dcae551f2ebf7ada",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "1b498397ccdc6918dcae551f2ebf7ada",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "1b498397ccdc6918dcae551f2ebf7ada",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "1b498397ccdc6918dcae551f2ebf7ada",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "1b498397ccdc6918dcae551f2ebf7ada",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "1b498397ccdc6918dcae551f2ebf7ada",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "1b498397ccdc6918dcae551f2ebf7ada",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "1b498397ccdc6918dcae551f2ebf7ada",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "1b498397ccdc6918dcae551f2ebf7ada",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "1b498397ccdc6918dcae551f2ebf7ada",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "1b498397ccdc6918dcae551f2ebf7ada",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "1b498397ccdc6918dcae551f2ebf7ada",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "1b498397ccdc6918dcae551f2ebf7ada",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "1b498397ccdc6918dcae551f2ebf7ada",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "1b498397ccdc6918dcae551f2ebf7ada",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "1b498397ccdc6918dcae551f2ebf7ada",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "1b498397ccdc6918dcae551f2ebf7ada",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "1b498397ccdc6918dcae551f2ebf7ada",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "1b498397ccdc6918dcae551f2ebf7ada",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "e174f03314b8ca77bff08c7486ccd4d5",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "e174f03314b8ca77bff08c7486ccd4d5",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "e174f03314b8ca77bff08c7486ccd4d5",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "e174f03314b8ca77bff08c7486ccd4d5",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "e174f03314b8ca77bff08c7486ccd4d5",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "e174f03314b8ca77bff08c7486ccd4d5",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "e174f03314b8ca77bff08c7486ccd4d5",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "e174f03314b8ca77bff08c7486ccd4d5",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "e174f03314b8ca77bff08c7486ccd4d5",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "e174f03314b8ca77bff08c7486ccd4d5",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "e174f03314b8ca77bff08c7486ccd4d5",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "e174f03314b8ca77bff08c7486ccd4d5",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "e174f03314b8ca77bff08c7486ccd4d5",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "e174f03314b8ca77bff08c7486ccd4d5",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "e174f03314b8ca77bff08c7486ccd4d5",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "e174f03314b8ca77bff08c7486ccd4d5",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "e174f03314b8ca77bff08c7486ccd4d5",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "e174f03314b8ca77bff08c7486ccd4d5",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "e174f03314b8ca77bff08c7486ccd4d5",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "e174f03314b8ca77bff08c7486ccd4d5",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "e174f03314b8ca77bff08c7486ccd4d5",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "e174f03314b8ca77bff08c7486ccd4d5",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "e174f03314b8ca77bff08c7486ccd4d5",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "e174f03314b8ca77bff08c7486ccd4d5",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "e174f03314b8ca77bff08c7486ccd4d5",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "e174f03314b8ca77bff08c7486ccd4d5",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "e174f03314b8ca77bff08c7486ccd4d5",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "e174f03314b8ca77bff08c7486ccd4d5",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "e174f03314b8ca77bff08c7486ccd4d5",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "e174f03314b8ca77bff08c7486ccd4d5",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "e174f03314b8ca77bff08c7486ccd4d5",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "e174f03314b8ca77bff08c7486ccd4d5",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "e174f03314b8ca77bff08c7486ccd4d5",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "e174f03314b8ca77bff08c7486ccd4d5",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "e174f03314b8ca77bff08c7486ccd4d5",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "e174f03314b8ca77bff08c7486ccd4d5",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "e174f03314b8ca77bff08c7486ccd4d5",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "e174f03314b8ca77bff08c7486ccd4d5",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "e174f03314b8ca77bff08c7486ccd4d5",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "e174f03314b8ca77bff08c7486ccd4d5",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "e174f03314b8ca77bff08c7486ccd4d5",
+      "type": "external"
+    },
+    {
+      "source": "589ca86daa3972453c88f789130afb08",
+      "target": "08074c86b747adb5b730539be6a9814c",
+      "type": "external"
+    }
+  ]
+}

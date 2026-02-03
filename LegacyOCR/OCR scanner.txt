@@ -1,0 +1,327 @@
+OCR scanner
+
+# 統合・改訂版 仕様書（最高水準）
+
+## 1. プロダクト定義
+
+### 1.1 目的
+
+広告・チラシ・PDF・Webページから日本語文言を高精度に抽出し、**段落単位で構造化**した上で、**A/B差分と同期率（シンクロ率）を定量化**し、業務で再利用できる形（Spreadsheet/CSV/RAG）に落とす。
+
+### 1.2 最重要価値（優先順位）
+
+1. **日本語テキスト抽出の正確性（OCR + 構造化）**
+2. **段落単位の再現性（比較・同期率の前提）**
+3. **差分と同期率が説明可能であること（監査可能性）**
+4. 出力・ライブラリ化（資産化）
+5. 拡張（評価コメント / 絵コンテ / アナリティクス / Webスクレイピング）
+
+---
+
+## 2. スコープ（フェーズ）
+
+* **Phase 1（コア）：** 画像/PDF/Webスクショから OCR → 非テキスト排除 → 段落構造化 → 日本語チェック → 正規化JSON保存
+* **Phase 2（比較）：** A/B差分、段落対応付け、同期率算出、CSV/Excel/Sheets出力
+* **Phase 3（Web）：** Web取得（静的/動的）＋ **パスワード入力型/フォームログイン/Basic認証** 対応 → 同パイプラインへ投入
+* **Phase 4（拡張）：** Groq評価コメント（ON/OFF）、絵コンテ生成、アナリティクス連携（APIキー）
+
+> ユーザー要望「すべて採用」は、**Phase 1〜4 で全採用**し、Phase 1/2 を揺るがせない構造にします。
+
+---
+
+## 3. 非機能要件（ここが“最高の仕様”の肝）
+
+### 3.1 再現性・監査性
+
+* すべての中間成果物を保存（入力・前処理・OCR生・構造化・比較）
+* 同一入力・同一設定で結果が安定（乱数禁止・ソート規則固定）
+* “なぜそう判断したか”は **ログとメタ情報**で追える（LLMの思考過程の開示は不要）
+
+### 3.2 セキュリティ
+
+* APIキー/ログイン情報は **Secrets** で管理（`.env` + OS Keychain/Secrets Manager想定）
+* 取得したWebコンテンツや広告素材の取り扱いに備え、**PII/機密のマスキングを将来差し込み可能な設計**
+* ログに本文を出しすぎない（debugフラグで切替）
+
+### 3.3 運用性
+
+* CLI中心（CIで自動検証できる）
+* 失敗時に復旧可能（リトライ・部分再実行・キャッシュ）
+
+---
+
+## 4. 入力仕様
+
+### 4.1 ファイル
+
+* PNG/JPG, PDF（複数ページ可）
+
+### 4.2 Web（Phase 3）
+
+* **公開ページ**
+* **Basic認証**
+* **フォームログイン（ID/Password + Cookie + CSRF）**
+* **“開発中のパスワード入力型”**（単一パスワード入力で閲覧可、あるいは簡易認証ゲート）
+
+---
+
+## 5. 出力仕様（データモデルを明確化）
+
+### 5.1 正規化結果（Normalized Document JSON）
+
+`normalized.json`（ページ単位 or ドキュメント単位）
+
+* `doc_id`, `source_type`（file/pdf/web）
+* `pages[]`
+
+  * `page_index`
+  * `paragraphs[]`
+
+    * `paragraph_id`（安定採番）
+    * `role`（headline/body/caption/price/legal/other）
+    * `text_raw`
+    * `text_normalized`
+    * `tokens_ja`（形態素/単語列：Phase1でも生成可能に）
+    * `bbox_union`（段落全体の外接矩形）
+    * `items[]`（元のOCR要素：line/wordの集合）
+    * `confidence_stats`（min/mean/p95）
+    * `style_hints`（font_size_bucket, weight_bucket 推定で可）
+    * `grammar_issues[]`（type, span, message）
+    * `suggestions[]`（before/after, reason）
+
+> ポイント：**比較に必要な“構造”を先に決める**。ここが曖昧だとPhase 2が破綻します。
+
+### 5.2 OCR生（Vision JSON）
+
+`ocr_vision.json`（レスポンスを極力そのまま保存）
+
+### 5.3 ライブラリ保存（資産化）
+
+```
+/library/{client}/{campaign}/{yyyy-mm}/
+  source/
+  fetched/         (webならHTML/スクショ)
+  preprocessed/
+  ocr/
+  normalized/
+  diff/
+  exports/
+  rag_chunks/
+  debug/           (可視化画像・オーバーレイ)
+  logs/
+```
+
+---
+
+## 6. コア処理仕様（精度の要）
+
+### 6.1 非テキスト除外（広告特化）
+
+* 前処理オプション：線/枠マスク（ON/OFF）
+* OCR後フィルタ：
+
+  * confidence閾値
+  * 異常に細長い/小さいbbox除外（装飾ノイズ対策）
+  * 記号だけの孤立ブロックの扱い（価格・注釈は除外しない）
+
+### 6.2 “CoT”の再定義（実装可能な形に落とす）
+
+ユーザーが求めるCoTは「段階推論で精度を上げる」こと。実装では **Staged Reasoning Pipeline** として定義します（=ステップごとの判定＋自己整合チェック）。
+
+* Step A：OCR要素の正規化（行/単語の並び順固定、空白推定）
+* Step B：段落クラスタリング（近接×整列×サイズ）
+* Step C：段落ロール推定（見出し/本文/注釈/価格/規約）
+* Step D：日本語整合（表記・文法・不自然分断検出）
+* Step E：自己整合チェック（段落境界が妥当か、再クラスタ候補）
+
+> これにより「推論は段階化されているが、思考過程を露出しない」実装ができます。
+
+### 6.3 日本語チェック（Phase 1で“使える”レベルに）
+
+* ルールベース（必須）：括弧不整合、句読点連続、全半角混在、単位表記揺れ、不要空白、英数字周りのスペース
+* 形態素（推奨）：SudachiPy等で token化し、怪しい分割や助詞連結を検知する下地を作る
+* LLM（Phase 4強化）：改善提案をより自然にする（Groq/OpenAI/Claudeなど差替可能に）
+
+---
+
+## 7. Webスクレイピング（Phase 3）の仕様を“最初から”硬くする
+
+### 7.1 取得方式（優先順）
+
+1. **HTML抽出（可能なら最優先）**：広告ページでもテキストがDOMにある場合はOCRより正確
+2. **レンダリング→スクショ→OCR**：デザイン重視・画像化された広告はこれが本命
+3. **PDFリンクを検出して直接PDF処理**：多いので必須
+
+### 7.2 認証対応（要件化）
+
+* Basic認証：`Authorization` ヘッダ
+* フォームログイン：CSRFトークン抽出→POST→Cookie保持
+* “パスワード入力型”：
+
+  * パターン1：単一フォームでパスワード送信→Cookie/Session発行
+  * パターン2：URLパラメータ/簡易ゲート（あるなら）
+* 重要：**ログイン手順を設定ファイル化**（案件ごとに差があるため）
+
+### 7.3 設定スキーマ（例）
+
+`connectors.yaml` に以下を定義できるようにする：
+
+* target_url
+* auth_type: none/basic/form/password_gate
+* selectors（ユーザー名欄/パス欄/submit）
+* csrf_selector（任意）
+* post_login_url（任意）
+* crawl_scope（同一ドメイン限定など）
+* wait_for（SPA対応：networkidle等）
+
+---
+
+## 8. 比較・同期率（Phase 2）も最初から仕様に含める（ブレ防止）
+
+* 段落対応：`paragraph_id`の一致ではなく **内容類似 + 位置類似**でマッチング
+* 同期率：少なくとも3種を出す
+
+  1. 文字正規化ベース
+  2. 形態素ベース（日本語向け）
+  3. 段落構造一致率（段落の対応率）
+
+---
+
+## 9. 品質ゲート（受入基準を“定量”に）
+
+### Phase 1 合格条件（例）
+
+* normalized.json が生成される（必須）
+* 主要段落が過分断しない（段落数が極端に多い場合は警告）
+* 1ページ当たりの平均confidence、除外率、段落数がログに残る
+* debugオーバーレイ画像（段落bbox表示）が生成できる（オンで）
+
+---
+
+# Cursor投入プロンプト（改訂：より強い指示）
+
+以下は「貼るだけ」で進むように、**Phase 0（雛形生成）→ Phase 1（コア）→ Phase 3（Web）→ Phase 2（比較）→ Phase 4（拡張）**の順で用意します。
+まずはユーザー要望どおり、**Phase 1を最高品質で固める**指示を出します（WebはPhase 3で実装）。
+
+---
+
+## A) Cursor貼り付け用：Phase 0（雛形＋仕様のファイル化）
+
+```text
+リポジトリを次の方針で初期化してください。
+- /docs/requirements.md に「統合・改訂版 仕様書（本チャットの最新版）」を反映し、仕様を単一の真実（SSOT）にする
+- /docs/phases/phase-0.md, phase-1.md を作り、実行手順・設計・制約・受入基準を明記する
+- /configs/connectors.yaml.example と /configs/pipeline.yaml.example を作る（Phase 3/チューニング用）
+- Pythonプロジェクトとして、CLI実行・テスト実行ができる最小骨格を作る
+- .env.example を作り、必要な環境変数を列挙する
+ここまで終えたら、次にPhase 1へ進む準備が整っているかをチェックリストで提示してください。
+```
+
+---
+
+## B) Cursor貼り付け用：Phase 1（コア：OCR→段落→日本語チェック→保存）
+
+```text
+あなたはシニアエンジニアとしてPhase 1を実装してください。Phase 2以降（比較/出力/絵コンテ/評価/Web取得）は実装しません。
+ただしPhase 3のWeb入力が後で自然に刺さるように、入力は「ページ画像またはHTMLテキスト」に正規化される設計にしてください。
+
+【目的】
+- 画像/PDF（将来はWebスクショ）から高精度に日本語文言を抽出し、広告レイアウトを考慮して段落単位に構造化
+- 線/枠/装飾等の非テキスト要素の影響を低減
+- 日本語文法/表記の問題を検出し、改善提案を返す（LLM未接続でも動く）
+- /library 以下に中間成果物を含めて保存し、監査可能にする
+
+【CLI】
+python -m app ingest --input <file_or_dir> --client <name> --campaign <name> [--month YYYY-MM] [--preprocess-lines on/off] [--debug on/off]
+
+【必須出力】
+- /library/.../source/ に入力コピー
+- /library/.../preprocessed/ にページ画像（PDFの場合）
+- /library/.../ocr/ocr_vision.json（生結果）
+- /library/.../normalized/normalized.json（段落構造化）
+- debug=on の場合 /library/.../debug/ に段落bboxオーバーレイ画像を保存
+
+【段落構造化（重要）】
+- OCR要素の順序を安定化（座標ソート規則を固定）
+- 近接×整列×サイズでクラスタリングし paragraph_id を安定採番
+- role（headline/body/caption/price/legal/other）を推定
+- text_raw と text_normalized を生成（正規化規則は固定）
+- tokens_ja（形態素/単語列）はPhase1で“生成可能”に（未導入なら空でも可だが拡張可能に）
+
+【日本語チェック（Phase1必須）】
+- ルールベースで grammar_issues / suggestions を出す
+- LLMインターフェースは用意するが、APIキー無しで必ず完走すること
+
+【チューニング】
+- OCR_CONFIDENCE_THRESHOLD、線マスクON/OFF、段落クラスタ閾値を設定ファイル化（pipeline.yaml）
+
+【テスト】
+- tests/assets のサンプル画像/PDFでE2Eが1件以上動く
+- 正規化JSONがスキーマ準拠で生成される（簡易schemaチェックで良い）
+
+【禁止】
+- Phase2（比較/同期率/CSV等）は実装しない
+- Phase3（Web取得/ログイン）は実装しない
+
+まずE2Eが動く最小実装を作り、次に段落精度と日本語チェックの品質を上げてください。
+```
+
+---
+
+## C) Cursor貼り付け用：Phase 3（Web取得＋パスワード入力型対応）※次に使う
+
+（今回は「用意だけ」しておきます。必要になったらそのまま貼れます）
+
+```text
+Phase 3を実装してください。Phase 1/2のコアロジックは変更せず、入力アダプタとして追加してください。
+
+【目的】
+- Webページからコンテンツを取得し、(1) HTMLテキスト抽出 または (2) レンダリング→スクショ→OCR でPhase1パイプラインへ投入
+- 認証：none/basic/form/password_gate を必須対応
+- 認証手順は /configs/connectors.yaml で設定可能にし、案件ごとに差し替えできる
+
+【実装要件】
+- requests系：静的HTML/Basic/フォームログイン（CSRF対応）
+- playwright：動的ページ/SPA/パスワードゲート対応（セレクタで入力→遷移→スクショ）
+- 取得したHTML/スクショを /library/.../fetched/ に保存し、監査可能にする
+- robots/レート制限/リトライ/タイムアウトを設定化
+
+【CLI追加】
+python -m app fetch_web --connector <name> --client ... --campaign ...
+
+完了後、Phase1のingestに自然に流し込めることを確認してください。
+```
+
+---
+
+# 追加：設定ファイル雛形（“最高の運用”のため）
+
+### configs/pipeline.yaml.example（概略）
+
+* OCR信頼度閾値
+* 段落クラスタ閾値（距離/整列/サイズ）
+* 正規化ルール（全半角/単位/記号）
+* debug出力ON/OFF
+* ログレベル
+
+### configs/connectors.yaml.example（概略）
+
+* connector名
+* URL
+* auth_type
+* selectors（フォーム・CSRF・ログイン後の判定）
+* playwright設定（wait_for, viewport, fullpageなど）
+
+---
+
+# 次のアクション（この場で決め打ちします）
+
+あなたの要望は「最高のものに再考・ブラッシュアップ」なので、次は迷わずこれです：
+
+1. **上の Phase 0 プロンプト**をCursorに貼って、仕様書と雛形をリポジトリに落とす
+2. 続けて **Phase 1 プロンプト**を貼って、E2Eが動く骨格を作る
+3. debugオーバーレイで、段落分割の成否を目視検証（広告はこれが最短）
+
+---
+
+必要であれば、次の返信でこちらから **「/docs/requirements.md に貼る完成版（Markdown）そのもの」**を、章立て・表・スキーマ定義付きで“コピペ可能な状態”で出します。

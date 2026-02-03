@@ -1,0 +1,47 @@
+# Large backup files
+*.zip
+*_backup_*/
+OCR_backup_*/
+OCR_MEKIKI_*/
+
+# Virtual environments
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# IDE
+.idea/
+.vscode/
+
+# Credentials (keep private)
+credentials.json
+*.pem
+*.key
+service_account.json
+**/credentials/
+**/service_account*.json
+
+# Large binary files
+*.pyd
+*.so
+*.dll
+
+# Logs
+*.log
+logs/
+
+# Temp files
+*.tmp
+temp_*/
+
+# Debug output
+debug/
+debug_output.txt
+
+# Data files (optional - uncomment if needed)
+# data/
+
+# OS files
+.DS_Store
+Thumbs.db

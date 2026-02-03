@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual Sitemap Generator - Dashboard</title>
+    <style>
+        :root {
+            --bg-primary: #1a1a2e;
+            --bg-secondary: #16213e;
+            --bg-card: #0f3460;
+            --accent: #e94560;
+            --accent-secondary: #00d9ff;
+            --text-primary: #eee;
+            --text-secondary: #888;
+            --success: #00d9ff;
+            --warning: #ffc107;
+            --error: #e94560;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Hiragino Sans', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--bg-card);
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 24px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            background: var(--bg-secondary);
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            background: var(--accent);
+            color: white;
+        }
+
+        .tab:hover:not(.active) {
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: var(--accent);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--text-secondary);
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 15px;
+            background: var(--bg-card);
+            border: 1px solid transparent;
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--accent-secondary);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #c73e54;
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background: #1a4a70;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--bg-card);
+        }
+
+        th {
+            color: var(--text-secondary);
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        tr:hover {
+            background: var(--bg-card);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        .status-completed {
+            background: var(--success);
+            color: #000;
+        }
+
+        .status-running {
+            background: var(--warning);
+            color: #000;
+        }
+
+        .status-failed {
+            background: var(--error);
+        }
+
+        .status-pending {
+            background: var(--bg-card);
+        }
+
+        .action-btn {
+            padding: 5px 10px;
+            font-size: 12px;
+            margin-right: 5px;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal h2 {
+            margin-bottom: 20px;
+            color: var(--accent);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+        }
+
+        .auth-config {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background: var(--bg-card);
+            border-radius: 8px;
+        }
+
+        .auth-config.active {
+            display: block;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state p {
+            margin-bottom: 20px;
+        }
+
+        .refresh-btn {
+            background: transparent;
+            border: 1px solid var(--bg-card);
+            color: var(--text-secondary);
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .refresh-btn:hover {
+            border-color: var(--accent-secondary);
+            color: var(--accent-secondary);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>🗺️ Visual Sitemap Generator</h1>
+            <button class="refresh-btn" onclick="refreshData()">🔄 更新</button>
+        </header>
+
+        <div class="tabs">
+            <button class="tab active" data-panel="jobs">ジョブ一覧</button>
+            <button class="tab" data-panel="profiles">プロファイル</button>
+            <button class="tab" data-panel="new-job">新規クロール</button>
+        </div>
+
+        <!-- Jobs Panel -->
+        <div id="jobs" class="panel active">
+            <div class="card">
+                <h2>📋 クロールジョブ</h2>
+                <div id="jobs-loading" class="loading">読み込み中...</div>
+                <table id="jobs-table" style="display: none;">
+                    <thead>
+                        <tr>
+                            <th>ステータス</th>
+                            <th>URL</th>
+                            <th>ページ数</th>
+                            <th>開始日時</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="jobs-body"></tbody>
+                </table>
+                <div id="jobs-empty" class="empty-state" style="display: none;">
+                    <p>ジョブがありません</p>
+                    <button class="btn btn-primary" onclick="showTab('new-job')">新規クロールを開始</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profiles Panel -->
+        <div id="profiles" class="panel">
+            <div class="card">
+                <h2>⚙️ プロファイル管理</h2>
+                <button class="btn btn-primary" onclick="showNewProfileModal()" style="margin-bottom: 15px;">+
+                    新規プロファイル</button>
+                <div id="profiles-loading" class="loading">読み込み中...</div>
+                <table id="profiles-table" style="display: none;">
+                    <thead>
+                        <tr>
+                            <th>名前</th>
+                            <th>ターゲットURL</th>
+                            <th>最大ページ</th>
+                            <th>モード</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="profiles-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- New Job Panel -->
+        <div id="new-job" class="panel">
+            <div class="card">
+                <h2>🚀 新規クロール</h2>
+                <form id="new-job-form">
+                    <div class="form-group">
+                        <label>プロファイル選択</label>
+                        <select id="job-profile" required>
+                            <option value="">-- プロファイルを選択 --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>開始URL（空欄でプロファイルのURLを使用）</label>
+                        <input type="url" id="job-start-url" placeholder="https://example.com">
+                    </div>
+                    <button type="submit" class="btn btn-primary">クロール開始</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Profile Modal -->
+    <div id="profile-modal" class="modal-overlay">
+        <div class="modal">
+            <h2>新規プロファイル</h2>
+            <form id="profile-form">
+                <div class="form-group">
+                    <label>プロファイル名</label>
+                    <input type="text" id="profile-name" required placeholder="例: 本番サイト LP群">
+                </div>
+                <div class="form-group">
+                    <label>ターゲットURL</label>
+                    <input type="url" id="profile-url" placeholder="https://example.com">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>最大ページ数</label>
+                        <input type="number" id="profile-max-pages" value="50" min="1" max="1000">
+                    </div>
+                    <div class="form-group">
+                        <label>最大深さ</label>
+                        <input type="number" id="profile-max-depth" value="3" min="1" max="10">
+                    </div>
+                    <div class="form-group">
+                        <label>モード</label>
+                        <select id="profile-mode">
+                            <option value="render">Render（スクショあり）</option>
+                            <option value="fast">Fast（高速・スクショなし）</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>認証モード</label>
+                    <select id="profile-auth-mode" onchange="toggleAuthConfig()">
+                        <option value="none">なし</option>
+                        <option value="basic">Basic認証</option>
+                        <option value="form">フォームログイン</option>
+                        <option value="manual">手動介入（2FA等）</option>
+                    </select>
+                </div>
+                <div id="auth-basic" class="auth-config">
+                    <div class="form-row" style="grid-template-columns: 1fr 1fr;">
+                        <div class="form-group">
+                            <label>ユーザー名</label>
+                            <input type="text" id="auth-user">
+                        </div>
+                        <div class="form-group">
+                            <label>パスワード</label>
+                            <input type="password" id="auth-pass">
+                        </div>
+                    </div>
+                </div>
+                <div id="auth-form" class="auth-config">
+                    <div class="form-group">
+                        <label>ログインURL</label>
+                        <input type="url" id="auth-login-url" placeholder="https://example.com/login">
+                    </div>
+                    <div class="form-row" style="grid-template-columns: 1fr 1fr;">
+                        <div class="form-group">
+                            <label>ユーザー名セレクタ</label>
+                            <input type="text" id="auth-username-selector" placeholder="#email">
+                        </div>
+                        <div class="form-group">
+                            <label>パスワードセレクタ</label>
+                            <input type="text" id="auth-password-selector" placeholder="#password">
+                        </div>
+                    </div>
+                    <div class="form-row" style="grid-template-columns: 1fr 1fr;">
+                        <div class="form-group">
+                            <label>送信ボタンセレクタ</label>
+                            <input type="text" id="auth-submit-selector" placeholder="button[type=submit]">
+                        </div>
+                        <div class="form-group">
+                            <label>成功インジケータ</label>
+                            <input type="text" id="auth-success-indicator" placeholder=".dashboard">
+                        </div>
+                    </div>
+                    <div class="form-row" style="grid-template-columns: 1fr 1fr;">
+                        <div class="form-group">
+                            <label>ユーザー名</label>
+                            <input type="text" id="auth-form-user">
+                        </div>
+                        <div class="form-group">
+                            <label>パスワード</label>
+                            <input type="password" id="auth-form-pass">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row" style="grid-template-columns: 1fr 1fr; margin-top: 15px;">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="profile-robots" checked>
+                        <label for="profile-robots">robots.txt を尊重</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="profile-sp">
+                        <label for="profile-sp">SP版スクショも撮影</label>
+                    </div>
+                </div>
+                <div style="margin-top: 20px; display: flex; gap: 10px;">
+                    <button type="submit" class="btn btn-primary">作成</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeProfileModal()">キャンセル</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/api/v1';
+
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                showTab(tab.dataset.panel);
+            });
+        });
+
+        function showTab(panelId) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.querySelector(`[data-panel="${panelId}"]`).classList.add('active');
+            document.getElementById(panelId).classList.add('active');
+        }
+
+        // Load data
+        async function loadJobs() {
+            try {
+                const res = await fetch(`${API_BASE}/jobs`);
+                const jobs = await res.json();
+
+                document.getElementById('jobs-loading').style.display = 'none';
+
+                if (jobs.length === 0) {
+                    document.getElementById('jobs-empty').style.display = 'block';
+                    return;
+                }
+
+                document.getElementById('jobs-table').style.display = 'table';
+                const tbody = document.getElementById('jobs-body');
+                tbody.innerHTML = jobs.map(job => {
+                    // 404エラーチェック：認証失敗の可能性を警告
+                    const has404 = job.result_summary && job.result_summary.status_404 > 0;
+                    const warningHtml = has404 ?
+                        `<span style="color: var(--warning); font-size: 11px; display: block;">⚠️ 404エラー検出 - ログイン認証が必要な可能性があります</span>` : '';
+
+                    return `
+                    <tr>
+                        <td><span class="status-badge status-${job.status}">${job.status}</span></td>
+                        <td>${job.start_url}${warningHtml}</td>
+                        <td>${job.pages_crawled}</td>
+                        <td>${new Date(job.started_at).toLocaleString('ja-JP')}</td>
+                        <td>
+                            ${job.status === 'completed' ? `
+                                <button class="btn btn-secondary action-btn" onclick="viewSitemap('${job.id}')">📊 表示</button>
+                                <button class="btn btn-secondary action-btn" onclick="downloadCSV('${job.id}')">📥 CSV</button>
+                                <button class="btn btn-secondary action-btn" onclick="viewAudit('${job.id}')">🔍 監査</button>
+                            ` : ''}
+                            ${job.status === 'running' ? `
+                                <button class="btn btn-secondary action-btn" onclick="stopJob('${job.id}')">⏹ 停止</button>
+                            ` : ''}
+                            <button class="btn btn-secondary action-btn" onclick="deleteJob('${job.id}')" style="color: var(--error);">🗑️</button>
+                        </td>
+                    </tr>
+                `}).join('');
+            } catch (err) {
+                console.error('Failed to load jobs:', err);
+            }
+        }
+
+        async function loadProfiles() {
+            try {
+                const res = await fetch(`${API_BASE}/profiles`);
+                const profiles = await res.json();
+
+                document.getElementById('profiles-loading').style.display = 'none';
+                document.getElementById('profiles-table').style.display = 'table';
+
+                const tbody = document.getElementById('profiles-body');
+                tbody.innerHTML = profiles.map(p => `
+                    <tr>
+                        <td>${p.name}</td>
+                        <td>${p.target_url || '-'}</td>
+                        <td>${p.max_pages}</td>
+                        <td>${p.mode}</td>
+                        <td>
+                            <button class="btn btn-secondary action-btn" onclick="deleteProfile(${p.id})">🗑️ 削除</button>
+                        </td>
+                    </tr>
+                `).join('');
+
+                // Update job form select
+                const select = document.getElementById('job-profile');
+                select.innerHTML = '<option value="">-- プロファイルを選択 --</option>' +
+                    profiles.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+            } catch (err) {
+                console.error('Failed to load profiles:', err);
+            }
+        }
+
+        function refreshData() {
+            loadJobs();
+            loadProfiles();
+        }
+
+        // Actions
+        function viewSitemap(jobId) {
+            window.open(`${API_BASE}/jobs/${jobId}/export/html`, '_blank');
+        }
+
+        function downloadCSV(jobId) {
+            window.location.href = `${API_BASE}/jobs/${jobId}/export/csv`;
+        }
+
+        function viewAudit(jobId) {
+            window.open(`${API_BASE}/jobs/${jobId}/audit?format=html`, '_blank');
+        }
+
+        async function stopJob(jobId) {
+            try {
+                await fetch(`${API_BASE}/jobs/${jobId}/stop`, { method: 'POST' });
+                loadJobs();
+            } catch (err) {
+                alert('停止に失敗しました');
+            }
+        }
+
+        async function deleteJob(jobId) {
+            if (!confirm('このジョブを削除しますか？関連するページデータも削除されます。')) return;
+            try {
+                const res = await fetch(`${API_BASE}/jobs/${jobId}`, { method: 'DELETE' });
+                if (res.ok) {
+                    loadJobs();
+                } else {
+                    const err = await res.json();
+                    alert('削除失敗: ' + (err.detail || 'unknown error'));
+                }
+            } catch (err) {
+                alert('削除に失敗しました');
+            }
+        }
+
+        async function deleteProfile(profileId) {
+            if (!confirm('このプロファイルを削除しますか？')) return;
+            try {
+                await fetch(`${API_BASE}/profiles/${profileId}`, { method: 'DELETE' });
+                loadProfiles();
+            } catch (err) {
+                alert('削除に失敗しました');
+            }
+        }
+
+        // Profile Modal
+        function showNewProfileModal() {
+            document.getElementById('profile-modal').classList.add('active');
+        }
+
+        function closeProfileModal() {
+            document.getElementById('profile-modal').classList.remove('active');
+        }
+
+        function toggleAuthConfig() {
+            const mode = document.getElementById('profile-auth-mode').value;
+            document.querySelectorAll('.auth-config').forEach(el => el.classList.remove('active'));
+            if (mode === 'basic') {
+                document.getElementById('auth-basic').classList.add('active');
+            } else if (mode === 'form') {
+                document.getElementById('auth-form').classList.add('active');
+            }
+        }
+
+        // Forms
+        document.getElementById('profile-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const authMode = document.getElementById('profile-auth-mode').value;
+            let authConfig = { mode: authMode };
+
+            if (authMode === 'basic') {
+                authConfig.user = document.getElementById('auth-user').value;
+                authConfig.pass = document.getElementById('auth-pass').value;
+            } else if (authMode === 'form') {
+                authConfig.login_url = document.getElementById('auth-login-url').value;
+                authConfig.username_selector = document.getElementById('auth-username-selector').value;
+                authConfig.password_selector = document.getElementById('auth-password-selector').value;
+                authConfig.submit_selector = document.getElementById('auth-submit-selector').value;
+                authConfig.success_indicator = document.getElementById('auth-success-indicator').value;
+                authConfig.user = document.getElementById('auth-form-user').value;
+                authConfig.pass = document.getElementById('auth-form-pass').value;
+            }
+
+            const data = {
+                name: document.getElementById('profile-name').value,
+                target_url: document.getElementById('profile-url').value || null,
+                max_pages: parseInt(document.getElementById('profile-max-pages').value),
+                max_depth: parseInt(document.getElementById('profile-max-depth').value),
+                mode: document.getElementById('profile-mode').value,
+                auth_config: authConfig,
+                respect_robots: document.getElementById('profile-robots').checked,
+                capture_sp: document.getElementById('profile-sp').checked
+            };
+
+            try {
+                const res = await fetch(`${API_BASE}/profiles`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (res.ok) {
+                    closeProfileModal();
+                    loadProfiles();
+                    document.getElementById('profile-form').reset();
+                } else {
+                    const err = await res.json();
+                    alert('エラー: ' + (err.detail || 'プロファイル作成に失敗'));
+                }
+            } catch (err) {
+                alert('通信エラー');
+            }
+        });
+
+        document.getElementById('new-job-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const data = {
+                profile_id: parseInt(document.getElementById('job-profile').value),
+                start_url: document.getElementById('job-start-url').value || null
+            };
+
+            try {
+                const res = await fetch(`${API_BASE}/jobs`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (res.ok) {
+                    showTab('jobs');
+                    loadJobs();
+                    document.getElementById('new-job-form').reset();
+                } else {
+                    const err = await res.json();
+                    alert('エラー: ' + (err.detail || 'ジョブ作成に失敗'));
+                }
+            } catch (err) {
+                alert('通信エラー');
+            }
+        });
+
+        // Init
+        refreshData();
+
+        // Auto-refresh running jobs
+        setInterval(() => {
+            loadJobs();
+        }, 5000);
+    </script>
+</body>
+
+</html>

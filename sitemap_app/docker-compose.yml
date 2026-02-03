@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  sitemap-generator:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./outputs:/app/outputs
+      - ./sitemap.db:/app/sitemap.db
+    environment:
+      - DATABASE_URL=sqlite:///./sitemap.db
+    restart: unless-stopped

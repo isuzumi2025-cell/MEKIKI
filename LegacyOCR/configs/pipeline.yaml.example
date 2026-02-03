@@ -1,0 +1,132 @@
+# OCR パイプライン設定ファイル
+# このファイルを pipeline.yaml にコピーして使用してください
+
+# OCR設定
+ocr:
+  # 信頼度閾値（0.0-1.0）
+  confidence_threshold: 0.5
+  
+  # OCRプロバイダー: google|azure|tesseract
+  provider: "google"
+  
+  # Google Cloud Vision API設定（provider=googleの場合）
+  google:
+    # 環境変数 GOOGLE_APPLICATION_CREDENTIALS で認証情報を指定
+    # または環境変数 GOOGLE_CLOUD_API_KEY でAPIキーを指定
+    max_results: 100
+  
+  # Azure Computer Vision設定（provider=azureの場合）
+  azure:
+    # 環境変数 AZURE_COMPUTER_VISION_ENDPOINT でエンドポイントを指定
+    # 環境変数 AZURE_COMPUTER_VISION_KEY でAPIキーを指定
+  
+  # Tesseract設定（provider=tesseractの場合）
+  tesseract:
+    lang: "jpn"
+    psm: 6  # ページセグメンテーションモード
+
+# 前処理設定
+preprocessing:
+  # 線/枠マスクの有効化
+  line_mask_enabled: true
+  
+  # ノイズ除去
+  denoise:
+    enabled: true
+    method: "gaussian"  # gaussian|bilateral|none
+
+# 段落クラスタリング設定
+paragraph:
+  clustering:
+    # 距離閾値（ピクセル）
+    distance_threshold: 50
+    
+    # 整列判定の閾値（0.0-1.0）
+    alignment_threshold: 0.8
+    
+    # サイズ類似度の閾値（0.0-1.0）
+    size_similarity_threshold: 0.7
+    
+    # 最小段落サイズ（ピクセル）
+    min_paragraph_size: 10
+  
+  # ロール推定
+  role_estimation:
+    # 見出し判定: フォントサイズが平均の何倍以上か
+    headline_size_ratio: 1.5
+    
+    # 価格判定: 数字+記号の割合
+    price_digit_ratio: 0.3
+    
+    # 注釈/規約判定: フォントサイズが平均の何倍以下か
+    caption_size_ratio: 0.8
+
+# 日本語チェック設定
+japanese:
+  # チェック有効化
+  check_enabled: true
+  
+  # 形態素解析器: sudachi|none
+  morph_analyzer: "sudachi"
+  
+  # ルールベースチェック
+  rules:
+    # 括弧不整合チェック
+    bracket_check: true
+    
+    # 句読点連続チェック
+    punctuation_check: true
+    
+    # 全半角混在チェック
+    fullwidth_check: true
+    
+    # 単位表記揺れチェック
+    unit_check: true
+    
+    # 不要空白チェック
+    whitespace_check: true
+    
+    # 英数字周りのスペースチェック
+    alnum_spacing_check: true
+
+# 正規化ルール
+normalization:
+  # 全角数字を半角に変換
+  fullwidth_to_halfwidth: true
+  
+  # 全角英字を半角に変換
+  fullwidth_alpha_to_halfwidth: true
+  
+  # 単位表記の統一
+  unit_normalization:
+    enabled: true
+    rules:
+      - from: "¥"
+        to: "円"
+      - from: "\\"
+        to: "円"
+
+# デバッグ設定
+debug:
+  # デバッグ出力の有効化
+  enabled: false
+  
+  # ログレベル: DEBUG|INFO|WARNING|ERROR
+  log_level: "INFO"
+  
+  # 本文をログに出力するか（セキュリティ考慮）
+  log_text_content: false
+  
+  # オーバーレイ画像の出力
+  overlay_images: true
+
+# 出力設定
+output:
+  # 中間成果物を保存するか
+  save_intermediates: true
+  
+  # OCR生JSONを保存するか
+  save_ocr_raw: true
+  
+  # 前処理画像を保存するか
+  save_preprocessed: true

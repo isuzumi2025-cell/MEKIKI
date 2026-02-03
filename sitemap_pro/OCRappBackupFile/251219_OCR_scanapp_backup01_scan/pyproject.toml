@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=65.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ocr-scanner"
+version = "0.1.0"
+description = "広告・チラシ・PDF・Webページから日本語文言を高精度に抽出"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "click>=8.1.0",
+    "pyyaml>=6.0",
+    "Pillow>=10.0.0",
+    "opencv-python>=4.8.0",
+    "PyPDF2>=3.0.0",
+    "pdf2image>=1.16.0",
+    "google-cloud-vision>=3.4.0",
+    "pytesseract>=0.3.10",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+]
+
+[project.scripts]
+ocr-scanner = "app.cli:cli"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
