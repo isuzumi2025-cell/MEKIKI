@@ -1,0 +1,29 @@
+# Normalize text files to LF by default
+* text=auto eol=lf
+
+# Shell and config files
+*.sh text eol=lf
+*.bash text eol=lf
+*.zsh text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.toml text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+
+# Windows-native script files
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Binary files
+*.png -text
+*.jpg -text
+*.jpeg -text
+*.gif -text
+*.pdf -text
+*.zip -text
+*.db -text
+*.dll -text
+*.so -text
+*.pyd -text
