@@ -1,0 +1,55 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# 仮想環境
+venv/
+ENV/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 認証情報（重要！）
+service_account.json
+auth.json
+_credentials/
+*.pem
+*.key
+
+# 一時ファイル
+temp_*
+*.tmp
+*.log
+
+# 出力データ
+output_data/
+saved project/
+project_data.json
+
+# OS
+.DS_Store
+Thumbs.db
+

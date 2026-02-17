@@ -1,0 +1,28 @@
+Traceback (most recent call last):
+  File "C:\Users\raiko\OneDrive\Desktop\26\sitemap_app\verify_template.py", line 36, in <module>
+    test_generation()
+  File "C:\Users\raiko\OneDrive\Desktop\26\sitemap_app\verify_template.py", line 14, in test_generation
+    html = viewer.generate_comparison_html(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\raiko\OneDrive\Desktop\26\sitemap_app\app\core\comparison_viewer.py", line 65, in generate_comparison_html
+    template = self.env.get_template("comparison_view.html")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\raiko\AppData\Local\Programs\Python\Python311\Lib\site-packages\jinja2\environment.py", line 1016, in get_template
+    return self._load_template(name, globals)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\raiko\AppData\Local\Programs\Python\Python311\Lib\site-packages\jinja2\environment.py", line 975, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\raiko\AppData\Local\Programs\Python\Python311\Lib\site-packages\jinja2\loaders.py", line 138, in load
+    code = environment.compile(source, name, filename)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\raiko\AppData\Local\Programs\Python\Python311\Lib\site-packages\jinja2\environment.py", line 771, in compile
+    self.handle_exception(source=source_hint)
+  File "C:\Users\raiko\AppData\Local\Programs\Python\Python311\Lib\site-packages\jinja2\environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "C:\Users\raiko\OneDrive\Desktop\26\sitemap_app\app\templates\comparison_view.html", line 641, in template
+    sync_rate: {{ sync_rate }
+jinja2.exceptions.TemplateSyntaxError: unexpected '}'
+Initializing ComparisonViewer...
+Generating HTML...
+CRASHED: unexpected '}'

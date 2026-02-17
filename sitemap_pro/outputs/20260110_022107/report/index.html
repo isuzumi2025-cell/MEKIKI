@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sitemap Pro Report</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #sidebar {
+            width: 350px;
+            background: #f8f9fa;
+            border-right: 1px solid #ddd;
+            padding: 20px;
+            overflow-y: auto;
+            display: none;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+
+        #cy {
+            flex-grow: 1;
+            background: #fff;
+        }
+
+        .stat-item {
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        img.screenshot {
+            width: 100%;
+            border: 1px solid #ccc;
+            margin-top: 10px;
+            border-radius: 4px;
+        }
+
+        h2 {
+            margin-top: 0;
+            font-size: 1.2rem;
+        }
+
+        .node-stat {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        #close-sidebar {
+            float: right;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="sidebar">
+        <span id="close-sidebar">&times;</span>
+        <h2 id="page-title">Page Details</h2>
+        <div class="stat-item"><span class="stat-label">URL:</span> <a id="page-url" href="#" target="_blank"></a></div>
+        <div class="stat-item"><span class="stat-label">Status:</span> <span id="page-status"></span></div>
+        <div class="stat-item"><span class="stat-label">Links:</span> <span id="page-links"></span></div>
+        <img id="page-screenshot" class="screenshot" src="" alt="Screenshot">
+    </div>
+    <div id="cy"></div>
+
+    <script>
+        // Data injected here by generator
+        const data = {"meta": {"run_id": "20260110_022107", "start_url": "https://example.com", "timestamp": "2026-01-10T02:21:09.016530", "total_pages": 1}, "config": {"START_URL": "https://example.com", "ALLOWED_DOMAINS": ["example.com"], "MAX_PAGES": 3, "CONCURRENCY": 4, "HEADLESS": true, "TIMEOUT_SECONDS": 30, "WAIT_FOR_SELECTOR": "body", "USER_AGENT": "SitemapPro/0.1.0 (Compatible; Playwright)", "AUTH_TYPE": "none", "AUTH_USER": "", "AUTH_PASS": "***", "LOGIN_URL": "", "AUTH_SELECTORS": {"user": "#username", "pass": "#password", "submit": "button[type='submit']"}, "COOKIES": "***", "OUTPUT_DIR": "outputs"}, "nodes": [{"id": "c984d06aafbecf6bc55569f964148ea3", "url": "https://example.com", "title": "Example Domain", "status": 200, "screenshot": "images/c984d06aafbecf6bc55569f964148ea3.png", "thumbnail": "images/c984d06aafbecf6bc55569f964148ea3_thumb.png", "h1": "Example Domain", "meta_desc": "", "canonical": "", "links": [], "links_count": 1}], "edges": [{"source": "c984d06aafbecf6bc55569f964148ea3", "target": "627c563fbd0cd06f296d2bb8d790ed4f", "type": "external"}]};
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const cy = cytoscape({
+                container: document.getElementById('cy'),
+                elements: {
+                    nodes: data.nodes.map(n => ({
+                        data: { id: n.id, label: n.title || n.url, ...n }
+                    })),
+                    edges: data.edges.map(e => ({
+                        data: { source: e.source, target: e.target }
+                    }))
+                },
+                style: [
+                    {
+                        selector: 'node',
+                        style: {
+                            'background-color': '#007bff',
+                            'label': 'data(label)',
+                            'font-size': '10px',
+                            'width': 20,
+                            'height': 20
+                        }
+                    },
+                    {
+                        selector: 'edge',
+                        style: {
+                            'width': 1,
+                            'line-color': '#ccc',
+                            'target-arrow-color': '#ccc',
+                            'target-arrow-shape': 'triangle',
+                            'curve-style': 'bezier'
+                        }
+                    },
+                    {
+                        selector: 'node:selected',
+                        style: {
+                            'background-color': '#d63384',
+                            'border-width': 2,
+                            'border-color': '#333'
+                        }
+                    }
+                ],
+                layout: {
+                    name: 'cose',
+                    animate: false
+                }
+            });
+
+            const sidebar = document.getElementById('sidebar');
+            const closeBtn = document.getElementById('close-sidebar');
+
+            cy.on('tap', 'node', function (evt) {
+                const node = evt.target.data();
+                showDetails(node);
+            });
+
+            closeBtn.onclick = () => { sidebar.style.display = 'none'; };
+
+            function showDetails(node) {
+                sidebar.style.display = 'block';
+                document.getElementById('page-title').innerText = node.title || "(No Title)";
+                document.getElementById('page-url').href = node.url;
+                document.getElementById('page-url').innerText = node.url;
+                document.getElementById('page-status').innerText = node.status;
+                document.getElementById('page-links').innerText = node.links_count || 0;
+
+                const img = document.getElementById('page-screenshot');
+                if (node.screenshot) {
+                    img.src = "../" + node.screenshot; // Relative path from report/index.html to images/
+                    img.style.display = 'block';
+                } else {
+                    img.style.display = 'none';
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

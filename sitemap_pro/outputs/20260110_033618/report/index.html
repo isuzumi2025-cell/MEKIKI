@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sitemap Pro Report</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #sidebar {
+            width: 350px;
+            background: #f8f9fa;
+            border-right: 1px solid #ddd;
+            padding: 20px;
+            overflow-y: auto;
+            display: none;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+
+        #cy {
+            flex-grow: 1;
+            background: #fff;
+        }
+
+        .stat-item {
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        img.screenshot {
+            width: 100%;
+            border: 1px solid #ccc;
+            margin-top: 10px;
+            border-radius: 4px;
+        }
+
+        h2 {
+            margin-top: 0;
+            font-size: 1.2rem;
+        }
+
+        .node-stat {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        #close-sidebar {
+            float: right;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="sidebar">
+        <span id="close-sidebar">&times;</span>
+        <h2 id="page-title">Page Details</h2>
+        <div class="stat-item"><span class="stat-label">URL:</span> <a id="page-url" href="#" target="_blank"></a></div>
+        <div class="stat-item"><span class="stat-label">Status:</span> <span id="page-status"></span></div>
+        <div class="stat-item"><span class="stat-label">Links:</span> <span id="page-links"></span></div>
+        <img id="page-screenshot" class="screenshot" src="" alt="Screenshot">
+    </div>
+    <div id="cy"></div>
+
+    <script>
+        // Data injected here by generator
+        const data = {"meta": {"run_id": "20260110_033618", "start_url": "https://www.portcafe.net/demo/jrkyushu/jisha-meguri/", "timestamp": "2026-01-10T03:36:22.976650", "total_pages": 1}, "config": {"START_URL": "https://www.portcafe.net/demo/jrkyushu/jisha-meguri/", "ALLOWED_DOMAINS": ["www.portcafe.net"], "MAX_PAGES": 10, "CONCURRENCY": 4, "HEADLESS": true, "TIMEOUT_SECONDS": 30, "WAIT_FOR_SELECTOR": "body", "USER_AGENT": "SitemapPro/0.1.0 (Compatible; Playwright)", "RESPECT_ROBOTS": true, "REQUEST_DELAY": 0.0, "AUTH_TYPE": "basic", "AUTH_USER": "jrq", "AUTH_PASS": "***", "LOGIN_URL": "", "AUTH_SELECTORS": {"user": "#username", "pass": "#password", "submit": "button[type='submit']"}, "COOKIES": "***", "OUTPUT_DIR": "outputs"}, "nodes": [{"id": "589ca86daa3972453c88f789130afb08", "url": "https://www.portcafe.net/demo/jrkyushu/jisha-meguri", "title": "九州寺社めぐり 駅長がおすすめする寺社を紹介！｜JR九州", "status": 200, "screenshot": "images/589ca86daa3972453c88f789130afb08.png", "thumbnail": "images/589ca86daa3972453c88f789130afb08_thumb.png", "h1": "\n        \n          \n        \n      ", "meta_desc": "", "canonical": "https://www.portcafe.net/demo/jrkyushu/jisha-meguri/", "links": [], "links_count": 8}], "edges": [{"source": "589ca86daa3972453c88f789130afb08", "target": "ca3d11f72044ff3e37b4968460618270", "type": "external"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "ca3d11f72044ff3e37b4968460618270", "type": "external"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "aedb48677b7ef687b2daf0fe248b8d15", "type": "external"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "5025e4cafaf46ba34ed0c208f4db1c73", "type": "external"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "08074c86b747adb5b730539be6a9814c", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "de6bcc5ea2fc98a6d1ce7b7b73c750ad", "type": "external"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "5010812b6d77578c7da67ffd8e1b5ebb", "type": "external"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "5010812b6d77578c7da67ffd8e1b5ebb", "type": "external"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "5010812b6d77578c7da67ffd8e1b5ebb", "type": "external"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "5025e4cafaf46ba34ed0c208f4db1c73", "type": "external"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "1b498397ccdc6918dcae551f2ebf7ada", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "e174f03314b8ca77bff08c7486ccd4d5", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "e174f03314b8ca77bff08c7486ccd4d5", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "e174f03314b8ca77bff08c7486ccd4d5", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "e174f03314b8ca77bff08c7486ccd4d5", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "e174f03314b8ca77bff08c7486ccd4d5", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "e174f03314b8ca77bff08c7486ccd4d5", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "1b498397ccdc6918dcae551f2ebf7ada", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "1b498397ccdc6918dcae551f2ebf7ada", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "1b498397ccdc6918dcae551f2ebf7ada", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "1b498397ccdc6918dcae551f2ebf7ada", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "1b498397ccdc6918dcae551f2ebf7ada", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "1b498397ccdc6918dcae551f2ebf7ada", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "1b498397ccdc6918dcae551f2ebf7ada", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "1b498397ccdc6918dcae551f2ebf7ada", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "1b498397ccdc6918dcae551f2ebf7ada", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "1b498397ccdc6918dcae551f2ebf7ada", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "1b498397ccdc6918dcae551f2ebf7ada", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "1b498397ccdc6918dcae551f2ebf7ada", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "1b498397ccdc6918dcae551f2ebf7ada", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "1b498397ccdc6918dcae551f2ebf7ada", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "1b498397ccdc6918dcae551f2ebf7ada", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "1b498397ccdc6918dcae551f2ebf7ada", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "1b498397ccdc6918dcae551f2ebf7ada", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "1b498397ccdc6918dcae551f2ebf7ada", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "1b498397ccdc6918dcae551f2ebf7ada", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "1b498397ccdc6918dcae551f2ebf7ada", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "1b498397ccdc6918dcae551f2ebf7ada", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "1b498397ccdc6918dcae551f2ebf7ada", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "1b498397ccdc6918dcae551f2ebf7ada", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "1b498397ccdc6918dcae551f2ebf7ada", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "1b498397ccdc6918dcae551f2ebf7ada", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "1b498397ccdc6918dcae551f2ebf7ada", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "1b498397ccdc6918dcae551f2ebf7ada", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "1b498397ccdc6918dcae551f2ebf7ada", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "1b498397ccdc6918dcae551f2ebf7ada", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "1b498397ccdc6918dcae551f2ebf7ada", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "1b498397ccdc6918dcae551f2ebf7ada", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "1b498397ccdc6918dcae551f2ebf7ada", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "e174f03314b8ca77bff08c7486ccd4d5", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "e174f03314b8ca77bff08c7486ccd4d5", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "e174f03314b8ca77bff08c7486ccd4d5", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "e174f03314b8ca77bff08c7486ccd4d5", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "e174f03314b8ca77bff08c7486ccd4d5", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "e174f03314b8ca77bff08c7486ccd4d5", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "e174f03314b8ca77bff08c7486ccd4d5", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "e174f03314b8ca77bff08c7486ccd4d5", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "e174f03314b8ca77bff08c7486ccd4d5", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "e174f03314b8ca77bff08c7486ccd4d5", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "e174f03314b8ca77bff08c7486ccd4d5", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "e174f03314b8ca77bff08c7486ccd4d5", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "e174f03314b8ca77bff08c7486ccd4d5", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "e174f03314b8ca77bff08c7486ccd4d5", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "e174f03314b8ca77bff08c7486ccd4d5", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "e174f03314b8ca77bff08c7486ccd4d5", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "e174f03314b8ca77bff08c7486ccd4d5", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "e174f03314b8ca77bff08c7486ccd4d5", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "e174f03314b8ca77bff08c7486ccd4d5", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "e174f03314b8ca77bff08c7486ccd4d5", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "e174f03314b8ca77bff08c7486ccd4d5", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "e174f03314b8ca77bff08c7486ccd4d5", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "e174f03314b8ca77bff08c7486ccd4d5", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "e174f03314b8ca77bff08c7486ccd4d5", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "e174f03314b8ca77bff08c7486ccd4d5", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "e174f03314b8ca77bff08c7486ccd4d5", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "e174f03314b8ca77bff08c7486ccd4d5", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "e174f03314b8ca77bff08c7486ccd4d5", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "e174f03314b8ca77bff08c7486ccd4d5", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "e174f03314b8ca77bff08c7486ccd4d5", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "e174f03314b8ca77bff08c7486ccd4d5", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "e174f03314b8ca77bff08c7486ccd4d5", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "e174f03314b8ca77bff08c7486ccd4d5", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "e174f03314b8ca77bff08c7486ccd4d5", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "e174f03314b8ca77bff08c7486ccd4d5", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "e174f03314b8ca77bff08c7486ccd4d5", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "e174f03314b8ca77bff08c7486ccd4d5", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "e174f03314b8ca77bff08c7486ccd4d5", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "e174f03314b8ca77bff08c7486ccd4d5", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "e174f03314b8ca77bff08c7486ccd4d5", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "e174f03314b8ca77bff08c7486ccd4d5", "type": "internal"}, {"source": "589ca86daa3972453c88f789130afb08", "target": "08074c86b747adb5b730539be6a9814c", "type": "internal"}]};
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const cy = cytoscape({
+                container: document.getElementById('cy'),
+                elements: {
+                    nodes: data.nodes.map(n => ({
+                        data: { id: n.id, label: n.title || n.url, ...n }
+                    })),
+                    edges: data.edges.map(e => ({
+                        data: { source: e.source, target: e.target }
+                    }))
+                },
+                style: [
+                    {
+                        selector: 'node',
+                        style: {
+                            'background-color': '#007bff',
+                            'label': 'data(label)',
+                            'font-size': '10px',
+                            'width': 20,
+                            'height': 20
+                        }
+                    },
+                    {
+                        selector: 'edge',
+                        style: {
+                            'width': 1,
+                            'line-color': '#ccc',
+                            'target-arrow-color': '#ccc',
+                            'target-arrow-shape': 'triangle',
+                            'curve-style': 'bezier'
+                        }
+                    },
+                    {
+                        selector: 'node:selected',
+                        style: {
+                            'background-color': '#d63384',
+                            'border-width': 2,
+                            'border-color': '#333'
+                        }
+                    }
+                ],
+                layout: {
+                    name: 'cose',
+                    animate: false
+                }
+            });
+
+            const sidebar = document.getElementById('sidebar');
+            const closeBtn = document.getElementById('close-sidebar');
+
+            cy.on('tap', 'node', function (evt) {
+                const node = evt.target.data();
+                showDetails(node);
+            });
+
+            closeBtn.onclick = () => { sidebar.style.display = 'none'; };
+
+            function showDetails(node) {
+                sidebar.style.display = 'block';
+                document.getElementById('page-title').innerText = node.title || "(No Title)";
+                document.getElementById('page-url').href = node.url;
+                document.getElementById('page-url').innerText = node.url;
+                document.getElementById('page-status').innerText = node.status;
+                document.getElementById('page-links').innerText = node.links_count || 0;
+
+                const img = document.getElementById('page-screenshot');
+                if (node.screenshot) {
+                    img.src = "../" + node.screenshot; // Relative path from report/index.html to images/
+                    img.style.display = 'block';
+                } else {
+                    img.style.display = 'none';
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

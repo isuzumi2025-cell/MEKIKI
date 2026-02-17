@@ -1,0 +1,45 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir:*)",
+      "Bash(findstr:*)",
+      "Bash(if exist .env echo .env exists)",
+      "Bash(pytest:*)",
+      "Bash(python -m unittest:*)",
+      "Bash(python -m pytest:*)",
+      "Bash(py -3 diagnose_ocr.py:*)",
+      "Bash(py -3 check_*:*)",
+      "Bash(Copy-Item *backup*)",
+      "Bash(git tag:*)",
+      "Bash(git status)",
+      "Bash(git diff:*)",
+      "Bash(ls:*)",
+      "Bash(wc:*)",
+      "Bash(find:*)",
+      "Bash(cat:*)"
+    ],
+    "deny": [
+      "Bash(rm:*)",
+      "Bash(Remove-Item:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(git push --force:*)"
+    ]
+  },
+  "agentops": {
+    "enabled": true,
+    "max_parallel_agents": 4,
+    "kpi_targets": {
+      "max_round_trips": 3,
+      "max_diff_loc_per_file": 100,
+      "max_test_failure_rate": 0.1
+    },
+    "validation": {
+      "auto_run_post_tool_use": true,
+      "domain_checks": [
+        "audit_ids",
+        "audit_coords",
+        "audit_match_quality"
+      ]
+    }
+  }
+}
