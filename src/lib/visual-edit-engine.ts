@@ -170,11 +170,14 @@ Return ONLY valid JSON, no markdown formatting.`;
         mimeType: string,
         prompt: string,
     ): Promise<string> {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${this.geminiApiKey}`;
+        const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
 
         const res = await fetch(url, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Content-Type": "application/json",
+                "x-goog-api-key": this.geminiApiKey,
+            },
             body: JSON.stringify({
                 contents: [{
                     parts: [

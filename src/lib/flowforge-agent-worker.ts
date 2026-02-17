@@ -28,7 +28,7 @@ import type {
     IHealthChecker,
 } from "./flowforge-agent-types.js";
 
-import { CircuitBreaker } from "./resilience.js";
+import { CircuitBreaker, LRUCache, SlidingWindow } from "./resilience.js";
 import { defaultNudgeRules, type NudgeRule } from "./nudge-rules.js";
 
 // ============================================================
@@ -59,95 +59,7 @@ const AgentCommandSchema = z.discriminatedUnion("type", [
     z.object({ type: z.literal("shutdown") }),
 ]);
 
-// ============================================================
-// T-010: LRU キャッシュ (最大100件)
-// ============================================================
-
-class LRUCache<T> {
-    private capacity: number;
-    private cache = new Map<string, T>();
-
-    constructor(capacity: number) {
-        this.capacity = capacity;
-    }
-
-    has(key: string): boolean {
-        if (!this.cache.has(key)) return false;
-        const value = this.cache.get(key) as T;
-        this.cache.delete(key);
-        this.cache.set(key, value);
-        return true;
-    }
-
-    set(key: string, value: T): void {
-        if (this.cache.has(key)) {
-            this.cache.delete(key);
-        } else if (this.cache.size >= this.capacity) {
-            const oldest = this.cache.keys().next().value;
-            if (oldest !== undefined) {
-                this.cache.delete(oldest);
-            }
-        }
-        this.cache.set(key, value);
-    }
-
-    delete(key: string): void {
-        this.cache.delete(key);
-    }
-
-    clear(): void {
-        this.cache.clear();
-    }
-
-    get size(): number {
-        return this.cache.size;
-    }
-}
-
-// ============================================================
-// T-011: スライディングウィンドウ (最大20件, 1時間超削除)
-// ============================================================
-
-interface TimestampedEntry {
-    value: string;
-    addedAt: number;
-}
-
-class SlidingWindowSet {
-    private entries: TimestampedEntry[] = [];
-    private maxSize: number;
-    private maxAgeMs: number;
-
-    constructor(maxSize: number, maxAgeMs: number) {
-        this.maxSize = maxSize;
-        this.maxAgeMs = maxAgeMs;
-    }
-
-    add(value: string): void {
-        this.prune();
-        const idx = this.entries.findIndex((e) => e.value === value);
-        if (idx !== -1) {
-            this.entries[idx] = { value, addedAt: Date.now() };
-            return;
-        }
-        if (this.entries.length >= this.maxSize) {
-            this.entries.shift();
-        }
-        this.entries.push({ value, addedAt: Date.now() });
-    }
-
-    getValues(): string[] {
-        this.prune();
-        return this.entries.map((e) => e.value);
-    }
-
-    private prune(): void {
-        const now = Date.now();
-        this.entries = this.entries.filter(
-            (e) => now - e.addedAt < this.maxAgeMs,
-        );
-    }
-}
+// T-010 / T-011: LRUCache and SlidingWindow are imported from resilience.ts
 
 // ============================================================
 // T-008: DefaultHealthChecker (implements IHealthChecker)
@@ -345,22 +257,29 @@ class ContextRegistry {
     };
 
     private lastPromptTimestamp = 0;
-    private sessionWindow = new SlidingWindowSet(20, 60 * 60 * 1000);
+    private sessionWindow = new SlidingWindow<string>({ maxEntries: 20, maxAgeMs: 60 * 60 * 1000 });
 
     get(): AgentContext {
         if (this.lastPromptTimestamp > 0) {
             this.context.promptEditIdleMs = Date.now() - this.lastPromptTimestamp;
         }
-        this.context.devinSessionIds = this.sessionWindow.getValues();
+        this.context.devinSessionIds = this.sessionWindow.getKeys();
         return { ...this.context };
     }
 
     update(partial: Partial<AgentContext>): void {
         if (partial.devinSessionIds) {
             for (const id of partial.devinSessionIds) {
-                this.sessionWindow.add(id);
+                this.sessionWindow.add(id, id);
             }
-            delete partial.devinSessionIds;
+            const rest = { ...partial };
+            delete rest.devinSessionIds;
+            Object.assign(this.context, rest);
+            this.context.lastActivity = new Date().toISOString();
+            if (partial.lastPrompt) {
+                this.lastPromptTimestamp = Date.now();
+            }
+            return;
         }
         Object.assign(this.context, partial);
         this.context.lastActivity = new Date().toISOString();
@@ -377,7 +296,7 @@ class ContextRegistry {
 
 class NudgeEngine {
     private nudgeCount = 0;
-    private sentNudgeIds = new LRUCache<number>(100);
+    private sentNudgeIds = new LRUCache<string, number>(100);
     private rules: NudgeRule[];
 
     constructor(rules?: NudgeRule[]) {
@@ -394,9 +313,9 @@ class NudgeEngine {
         for (const rule of this.rules) {
             if (!rule.condition(context, health)) continue;
 
-            if (this.sentNudgeIds.has(rule.id)) {
-                const lastSent = this.sentNudgeIds.has(rule.id) ? now : 0;
-                if (lastSent > 0) continue;
+            const lastSent = this.sentNudgeIds.get(rule.id);
+            if (lastSent !== undefined && (now - lastSent) < rule.cooldownMs) {
+                continue;
             }
 
             nudges.push({
@@ -407,15 +326,12 @@ class NudgeEngine {
                 action: rule.action,
                 timestamp: new Date().toISOString(),
             });
-        }
 
-        const newNudges = nudges.filter((n) => !this.sentNudgeIds.has(n.id));
-        for (const n of newNudges) {
-            this.sentNudgeIds.set(n.id, now);
+            this.sentNudgeIds.set(rule.id, now);
             this.nudgeCount++;
         }
 
-        return newNudges;
+        return nudges;
     }
 
     resetNudge(id: string): void {
