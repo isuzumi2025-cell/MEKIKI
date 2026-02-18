@@ -1,8 +1,8 @@
 /**
  * prompt-understanding-schemas.ts
  *
- * 6軸プロンプト理解の Zod スキーマバリデーション (T-601)
- * Grok 3軸 + Opus 3軸 の入出力を厳密に型検証する。
+ * 7軸プロンプト理解の Zod スキーマバリデーション (T-601 + T-602)
+ * Grok 3軸 + Opus 3軸 + A7感情分析軸 の入出力を厳密に型検証する。
  *
  * FlowForge SDK — Validation Layer
  */
@@ -16,7 +16,7 @@ import { z } from "zod";
 export const PromptUnderstandingInputSchema = z.object({
     prompt: z.string().min(1, "プロンプトは1文字以上必要です"),
     language: z.enum(["ja", "en"]).default("ja"),
-    includeAxes: z.array(z.enum(["A1", "A2", "A3", "A4", "A5", "A6"])).optional(),
+    includeAxes: z.array(z.enum(["A1", "A2", "A3", "A4", "A5", "A6", "A7"])).optional(),
 });
 
 export type PromptUnderstandingInput = z.infer<typeof PromptUnderstandingInputSchema>;
@@ -130,6 +130,55 @@ export const OpusAxesSchema = z.object({
 export type OpusAxes = z.infer<typeof OpusAxesSchema>;
 
 // ============================================================
+// A7: 感情分析軸 (T-602 — Gemini提案)
+// ============================================================
+
+export const EmotionCurvePointSchema = z.object({
+    /** タイムライン上の位置 (0.0-1.0) */
+    position: z.number().min(0).max(1),
+    /** 感情の強度 (0.0-1.0) */
+    intensity: z.number().min(0).max(1),
+    /** 感情のラベル */
+    emotion: z.enum([
+        "joy", "sadness", "anger", "fear", "surprise",
+        "disgust", "trust", "anticipation", "serenity",
+        "ecstasy", "grief", "terror", "amazement", "loathing",
+    ]),
+    /** トランジション種別 */
+    transition: z.enum(["linear", "ease-in", "ease-out", "ease-in-out", "step"]).default("ease-in-out"),
+});
+
+export const EmotionPaletteSchema = z.object({
+    /** 主要感情 */
+    primary: z.string(),
+    /** 副次感情 */
+    secondary: z.string().optional(),
+    /** 感情に対応するカラーコード */
+    colorMapping: z.record(z.string(), z.string()),
+    /** 全体的なムード */
+    overallMood: z.enum([
+        "uplifting", "melancholic", "tense", "peaceful",
+        "energetic", "mysterious", "romantic", "epic",
+        "playful", "contemplative", "nostalgic", "dramatic",
+    ]),
+});
+
+export const EmotionAxisSchema = z.object({
+    /** 感情曲線 — 動画タイムライン上の感情変化 */
+    emotionCurve: z.array(EmotionCurvePointSchema).min(1),
+    /** 感情パレット */
+    palette: EmotionPaletteSchema,
+    /** 音楽のテンポ推奨 (BPM) */
+    suggestedTempoBpm: z.number().int().min(40).max(200).optional(),
+    /** 視覚効果への影響度 (0.0-1.0) */
+    visualImpact: z.number().min(0).max(1),
+    /** 感情分析の根拠 */
+    reasoning: z.string(),
+});
+
+export type EmotionAxis = z.infer<typeof EmotionAxisSchema>;
+
+// ============================================================
 // 統合結果スキーマ
 // ============================================================
 
@@ -147,6 +196,7 @@ export const PromptUnderstandingResultSchema = z.object({
     input: PromptUnderstandingInputSchema,
     grokAxes: GrokAxesSchema.optional(),
     opusAxes: OpusAxesSchema.optional(),
+    emotionAxis: EmotionAxisSchema.optional(),
     confidence: ConfidenceScoreSchema,
     contradictions: z.array(z.object({
         axisA: z.string(),
@@ -185,6 +235,18 @@ export function safeValidateGrokAxes(data: unknown): { success: true; data: Grok
 
 export function safeValidateOpusAxes(data: unknown): { success: true; data: OpusAxes } | { success: false; error: z.ZodError } {
     const result = OpusAxesSchema.safeParse(data);
+    if (result.success) {
+        return { success: true, data: result.data };
+    }
+    return { success: false, error: result.error };
+}
+
+export function validateEmotionAxis(data: unknown): EmotionAxis {
+    return EmotionAxisSchema.parse(data);
+}
+
+export function safeValidateEmotionAxis(data: unknown): { success: true; data: EmotionAxis } | { success: false; error: z.ZodError } {
+    const result = EmotionAxisSchema.safeParse(data);
     if (result.success) {
         return { success: true, data: result.data };
     }

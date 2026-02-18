@@ -15,12 +15,19 @@ __pycache__/
 .vscode/
 
 # Credentials (keep private)
+.env
+.env.*
 credentials.json
 *.pem
 *.key
 service_account.json
 **/credentials/
 **/service_account*.json
+
+# Build output
+build/
+dist/
+output/
 
 # Large binary files
 *.pyd
@@ -45,3 +52,4 @@ debug_output.txt
 # OS files
 .DS_Store
 Thumbs.db
+node_modules

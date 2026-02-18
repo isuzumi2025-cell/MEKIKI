@@ -331,6 +331,10 @@ class NudgeEngine {
             this.nudgeCount++;
         }
 
+        // Sort by priority: high → medium → low
+        const priorityOrder: Record<string, number> = { high: 0, medium: 1, low: 2 };
+        nudges.sort((a, b) => (priorityOrder[a.priority] ?? 9) - (priorityOrder[b.priority] ?? 9));
+
         return nudges;
     }
 

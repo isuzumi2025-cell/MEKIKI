@@ -13,13 +13,15 @@ import { ResourceUploader } from "./ResourceUploader";
 import { VisualEditPanel } from "./VisualEditPanel";
 import { CharacterPanel } from "./CharacterPanel";
 import { ToneMannerPanel } from "./ToneMannerPanel";
+import { TextProcessingPanel, type TextItem } from "./TextProcessingPanel";
+import { MotionGraphicsPanel, type MotionGraphicsItem } from "./MotionGraphicsPanel";
 import { GenerationProgress } from "./GenerationProgress";
 import type { EditablePromptData, PromptSection } from "../../lib/editable-prompt";
 import type { GenerationJobResult } from "../../lib/resource-video-generator";
 import type { VisualEditInstruction } from "../../lib/visual-edit-engine";
 import type { CharacterDetail } from "../../lib/flow-prompt-builder";
 
-export type StudioTab = "prompt" | "resources" | "characters" | "tone" | "visual_edit";
+export type StudioTab = "prompt" | "resources" | "characters" | "tone" | "text" | "motion_graphics" | "visual_edit";
 
 export interface FlowForgeStudioProps {
     onGenerate?: (prompt: EditablePromptData) => void;
@@ -43,6 +45,8 @@ export const FlowForgeStudio: React.FC<FlowForgeStudioProps> = ({
         urls: [],
         colorPalette: [],
     });
+    const [textItems, setTextItems] = useState<TextItem[]>([]);
+    const [mgItems, setMgItems] = useState<MotionGraphicsItem[]>([]);
 
     const handleSectionEdit = useCallback((id: string, content: string) => {
         setSections(prev =>
@@ -64,6 +68,8 @@ export const FlowForgeStudio: React.FC<FlowForgeStudioProps> = ({
         { key: "resources", label: "リソース" },
         { key: "characters", label: "キャラクター" },
         { key: "tone", label: "トンマナ" },
+        { key: "text", label: "テキスト処理" },
+        { key: "motion_graphics", label: "MG" },
         { key: "visual_edit", label: "画像参照修正" },
     ];
 
@@ -116,6 +122,20 @@ export const FlowForgeStudio: React.FC<FlowForgeStudioProps> = ({
                         colorPalette={toneConfig.colorPalette}
                         onUrlsChange={(urls) => setToneConfig(prev => ({ ...prev, urls }))}
                         onPaletteChange={(colorPalette) => setToneConfig(prev => ({ ...prev, colorPalette }))}
+                    />
+                )}
+
+                {activeTab === "text" && (
+                    <TextProcessingPanel
+                        items={textItems}
+                        onChange={setTextItems}
+                    />
+                )}
+
+                {activeTab === "motion_graphics" && (
+                    <MotionGraphicsPanel
+                        items={mgItems}
+                        onChange={setMgItems}
                     />
                 )}
 

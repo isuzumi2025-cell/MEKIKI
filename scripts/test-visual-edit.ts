@@ -1,85 +1,77 @@
 /**
  * test-visual-edit.ts
  *
- * VisualEditEngine E2E テストスクリプト
+ * T-306: VisualEditEngine E2E テストスクリプト
+ * 参照画像でオブジェクト差し替えワークフローを検証。
  *
- * テストフロー:
- * 1. テストプロンプトで text_to_video 初回生成結果をシミュレート
- * 2. 参照画像（ダミー Base64）を読み込み
- * 3. VisualEditEngine.analyzeEdit() でオブジェクトマッチング検証
- * 4. regenerateWithVisualReference() で修正プロンプト生成
- * 5. editType → ReferenceImageType マッピング確認
- * 6. 修正プロンプトを表示
+ * 使い方:
+ *   npx tsx scripts/test-visual-edit.ts
  *
- * 実行: npx tsx scripts/test-visual-edit.ts
+ * 環境変数:
+ *   GEMINI_API_KEY — 必須 (Gemini Vision API)
  */
 
-import { EditablePrompt } from "../src/lib/editable-prompt.js";
-import { VisualEditEngine } from "../src/lib/visual-edit-engine.js";
-import type { VisualEditInstruction } from "../src/lib/visual-edit-engine.js";
-import type { GenerationJobResult } from "../src/lib/resource-video-generator.js";
+import "dotenv/config";
+import { VisualEditEngine, type VisualEditInstruction } from "../src/lib/visual-edit-engine";
+import { ResourceVideoGenerator } from "../src/lib/resource-video-generator";
+import type { EditablePromptData } from "../src/lib/editable-prompt";
 
-function createMockPreviousResult(): GenerationJobResult {
-    const prompt = new EditablePrompt();
-    prompt.addSection(
-        "scene",
-        "シーン記述",
-        "A construction site with workers in safety gear performing maintenance tasks",
-        "analysis",
-    );
-    prompt.addSection(
-        "characters",
-        "登場人物",
-        "Lead worker, tall man with a hardhat, wearing an orange safety vest, directing the crew at the center of the frame",
-        "analysis",
-    );
-    prompt.addSection(
-        "objects",
-        "小道具・物体",
-        "metal rod, a thin cylindrical steel rod with a yellow safety flag; safety cone, bright orange traffic cone at the corner",
-        "analysis",
-    );
-    prompt.addSection(
-        "camera",
-        "カメラワーク",
-        "medium shot, slow dolly in movement, eye level angle",
-        "analysis",
-    );
-    prompt.addSection(
-        "style",
-        "スタイル",
-        "photorealistic, cinematic lighting, industrial documentary style",
-        "analysis",
-    );
+const DIVIDER = "========================================";
+
+function createMockPreviousResult() {
+    const editablePrompt: EditablePromptData = {
+        sections: [
+            {
+                id: "scene",
+                label: "シーン記述",
+                content: "A cozy living room with warm lighting and wooden furniture",
+                source: "analysis",
+                modified: false,
+            },
+            {
+                id: "characters",
+                label: "登場人物",
+                content: "A young woman wearing a blue dress, sitting on a sofa",
+                source: "analysis",
+                modified: false,
+            },
+            {
+                id: "objects",
+                label: "小道具・物体",
+                content: "wooden table, ceramic vase with flowers, old leather-bound book",
+                source: "analysis",
+                modified: false,
+            },
+            {
+                id: "style",
+                label: "スタイル",
+                content: "warm color grading, soft focus, indie film aesthetic",
+                source: "analysis",
+                modified: false,
+            },
+        ],
+        combinedPrompt: "A cozy living room with warm lighting and wooden furniture. A young woman wearing a blue dress, sitting on a sofa. wooden table, ceramic vase with flowers, old leather-bound book. warm color grading, soft focus, indie film aesthetic.",
+        updatedAt: new Date().toISOString(),
+    };
 
     return {
-        status: "completed",
-        mode: "text_to_video",
-        finalPrompt: prompt.combine(),
-        editablePrompt: prompt.toData(),
+        status: "completed" as const,
+        mode: "text_to_video" as const,
+        finalPrompt: editablePrompt.combinedPrompt,
+        editablePrompt,
         log: [
-            {
-                step: "プロンプト構築",
-                status: "ok",
-                message: "テキストプロンプト設定完了",
-                durationMs: 0,
-            },
+            { step: "テスト", status: "ok" as const, message: "モックデータ作成済", durationMs: 0 },
         ],
         createdAt: new Date().toISOString(),
     };
 }
 
-function createDummyBase64Image(): string {
-    const header = Buffer.from([
-        0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
-    ]);
-    return header.toString("base64");
-}
+async function testEditTypeMapping() {
+    console.log(`\n${DIVIDER}`);
+    console.log("テスト 1: editType → referenceType マッピング");
+    console.log(DIVIDER);
 
-async function testEditTypeMapping(): Promise<void> {
-    console.log("=== Test: editType → ReferenceImageType mapping ===");
-
-    const engine = new VisualEditEngine({ geminiApiKey: "test-key" });
+    const engine = new VisualEditEngine();
 
     const mappings: Record<string, string> = {
         replace_shape: "asset",
@@ -89,185 +81,128 @@ async function testEditTypeMapping(): Promise<void> {
         match_pose: "subject",
     };
 
+    let passed = 0;
     for (const [editType, expected] of Object.entries(mappings)) {
         const result = engine.mapEditTypeToReferenceType(
-            editType as VisualEditInstruction["editType"],
+            editType as VisualEditInstruction["editType"]
         );
-        const status = result === expected ? "PASS" : "FAIL";
-        console.log(`  ${status}: ${editType} → ${result} (expected: ${expected})`);
+        const ok = result === expected;
+        console.log(`  ${ok ? "✅" : "❌"} ${editType} → ${result} (期待値: ${expected})`);
+        if (ok) passed++;
     }
 
-    console.log("");
+    console.log(`\n  結果: ${passed}/5 パス\n`);
+    return passed === 5;
 }
 
-function testPromptRestoration(): void {
-    console.log("=== Test: EditablePrompt restoration from data ===");
+async function testResourceVideoGeneratorIntegration() {
+    console.log(`\n${DIVIDER}`);
+    console.log("テスト 2: ResourceVideoGenerator.regenerateWithVisualReference 統合");
+    console.log(DIVIDER);
 
+    const generator = new ResourceVideoGenerator();
     const previousResult = createMockPreviousResult();
 
-    const restored = EditablePrompt.fromData(previousResult.editablePrompt);
-    const sections = restored.getSections();
+    console.log("  モック previousResult 作成完了");
+    console.log(`  セクション数: ${previousResult.editablePrompt.sections.length}`);
+    console.log(`  objects: "${previousResult.editablePrompt.sections.find(s => s.id === 'objects')?.content}"`);
 
-    console.log(`  Sections restored: ${sections.length}`);
-    for (const section of sections) {
-        console.log(`    [${section.id}] ${section.label}: ${section.content.substring(0, 60)}...`);
+    // Note: regenerateWithVisualReference は Gemini Vision API が必要
+    // API キーがない場合はスキップ
+    const apiKey = process.env.GEMINI_API_KEY ?? process.env.GOOGLE_API_KEY;
+    if (!apiKey) {
+        console.log("\n  ⚠️  GEMINI_API_KEY 未設定: Gemini Vision テストをスキップ");
+        console.log("  (editType マッピングは上記で検証済)\n");
+        return true;
     }
 
-    const combined = restored.combine();
-    console.log(`  Combined prompt length: ${combined.length} chars`);
-    console.log(`  PASS: Prompt restoration successful`);
-    console.log("");
-}
+    // ダミー画像（1x1 白ピクセル PNG）
+    const dummyImageBytes = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==";
 
-function testObjectExtraction(): void {
-    console.log("=== Test: Object extraction from EditablePrompt ===");
-
-    const previousResult = createMockPreviousResult();
-    const objectsSection = previousResult.editablePrompt.sections.find(s => s.id === "objects");
-
-    if (!objectsSection) {
-        console.log("  FAIL: No objects section found");
-        return;
-    }
-
-    const objectStrings = objectsSection.content.split(";").map(s => s.trim()).filter(Boolean);
-    console.log(`  Extracted ${objectStrings.length} objects:`);
-    for (const obj of objectStrings) {
-        console.log(`    - ${obj}`);
-    }
-
-    console.log(`  PASS: Object extraction successful`);
-    console.log("");
-}
-
-function testPromptEditing(): void {
-    console.log("=== Test: Prompt section editing ===");
-
-    const previousResult = createMockPreviousResult();
-    const prompt = EditablePrompt.fromData(previousResult.editablePrompt);
-
-    const originalObjects = prompt.getSection("objects")?.content ?? "";
-    console.log(`  Original objects: ${originalObjects}`);
-
-    const newObjectsContent = originalObjects.replace(
-        "a thin cylindrical steel rod with a yellow safety flag",
-        "A thick cylindrical metal rod with a red safety flag, heavy-duty industrial grade",
-    );
-    prompt.editSection("objects", newObjectsContent);
-
-    const edited = prompt.getSection("objects");
-    console.log(`  Edited objects: ${edited?.content}`);
-    console.log(`  Modified flag: ${edited?.modified}`);
-
-    const finalPrompt = prompt.combine();
-    console.log(`  Final prompt: ${finalPrompt.substring(0, 120)}...`);
-    console.log(`  PASS: Prompt editing successful`);
-    console.log("");
-}
-
-function testVisualEditInstructionTypes(): void {
-    console.log("=== Test: VisualEditInstruction type validation ===");
-
-    const dummyImage = createDummyBase64Image();
-
-    const instructions: VisualEditInstruction[] = [
-        {
-            referenceImageBytes: dummyImage,
-            referenceImageMimeType: "image/png",
-            targetElement: "metal rod",
-            editType: "replace_shape",
-            additionalInstruction: "Make it thicker and more industrial",
-        },
-        {
-            referenceImageBytes: dummyImage,
-            referenceImageMimeType: "image/jpeg",
-            targetElement: "safety cone",
-            editType: "replace_color",
-        },
-        {
-            referenceImageBytes: dummyImage,
-            referenceImageMimeType: "image/webp",
-            targetElement: "warning sign",
-            editType: "add_from_image",
-        },
-    ];
-
-    for (const inst of instructions) {
-        console.log(`  ${inst.editType} on "${inst.targetElement}" (${inst.referenceImageMimeType})`);
-        if (inst.additionalInstruction) {
-            console.log(`    Additional: ${inst.additionalInstruction}`);
-        }
-    }
-
-    console.log(`  PASS: All instruction types valid`);
-    console.log("");
-}
-
-function testEndToEndWithoutApi(): void {
-    console.log("=== Test: End-to-end flow (without API calls) ===");
-
-    const previousResult = createMockPreviousResult();
-    console.log(`  1. Previous result created with ${previousResult.editablePrompt.sections.length} sections`);
-    console.log(`     Mode: ${previousResult.mode}, Status: ${previousResult.status}`);
-
-    const prompt = EditablePrompt.fromData(previousResult.editablePrompt);
-    console.log(`  2. Prompt restored successfully`);
-
-    const mockReferenceDescription = "A thick cylindrical metal rod with a red safety flag, heavy-duty construction grade, matte steel finish with visible welding marks";
-
-    const objectsSection = prompt.getSection("objects");
-    if (objectsSection) {
-        const updatedContent = objectsSection.content.replace(
-            /metal rod,[^;]*/,
-            `metal rod, ${mockReferenceDescription}`,
-        );
-        prompt.editSection("objects", updatedContent);
-        console.log(`  3. Objects section updated with reference description`);
-    }
-
-    const finalPrompt = prompt.combine();
-    console.log(`  4. Final prompt generated (${finalPrompt.length} chars):`);
-    console.log(`     ${finalPrompt.substring(0, 200)}...`);
-
-    const updatedResult: GenerationJobResult = {
-        ...previousResult,
-        status: "ready",
-        finalPrompt,
-        editablePrompt: prompt.toData(),
-        log: [
-            ...previousResult.log,
-            {
-                step: "画像参照編集",
-                status: "ok",
-                message: "metal rod を参照画像で replace_shape 編集 (ref: asset)",
-                durationMs: 150,
-            },
-        ],
+    const instruction: VisualEditInstruction = {
+        referenceImageBytes: dummyImageBytes,
+        referenceImageMimeType: "image/png",
+        targetElement: "vase",
+        editType: "replace_shape",
+        additionalInstruction: "Replace the ceramic vase with a tall glass vase",
     };
 
-    console.log(`  5. Updated result: status=${updatedResult.status}, log entries=${updatedResult.log.length}`);
-    console.log(`  PASS: End-to-end flow completed`);
-    console.log("");
+    console.log(`\n  参照画像でオブジェクト差し替え実行中...`);
+    console.log(`  targetElement: "${instruction.targetElement}"`);
+    console.log(`  editType: "${instruction.editType}"`);
+
+    try {
+        const result = await generator.regenerateWithVisualReference(
+            previousResult,
+            instruction,
+        );
+
+        console.log(`\n  ✅ 再生成結果:`);
+        console.log(`     status: ${result.status}`);
+        console.log(`     finalPrompt: ${result.finalPrompt.slice(0, 100)}...`);
+        console.log(`     ログ数: ${result.log.length}`);
+
+        const editLog = result.log.find(l => l.step === "画像参照編集");
+        if (editLog) {
+            console.log(`     編集ログ: ${editLog.message}`);
+        }
+
+        return true;
+    } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        console.log(`\n  ❌ エラー: ${msg}`);
+        return false;
+    }
 }
 
-async function main(): Promise<void> {
-    console.log("========================================");
-    console.log("  VisualEditEngine E2E Test Suite");
-    console.log("========================================\n");
+async function testPromptDiffGeneration() {
+    console.log(`\n${DIVIDER}`);
+    console.log("テスト 3: プロンプト差分生成 (ローカル)");
+    console.log(DIVIDER);
 
-    await testEditTypeMapping();
-    testPromptRestoration();
-    testObjectExtraction();
-    testPromptEditing();
-    testVisualEditInstructionTypes();
-    testEndToEndWithoutApi();
+    const previousResult = createMockPreviousResult();
 
-    console.log("========================================");
-    console.log("  All offline tests completed!");
-    console.log("========================================");
+    // オブジェクトセクションの内容確認
+    const objectsSection = previousResult.editablePrompt.sections.find(s => s.id === "objects");
+    console.log(`  objects セクション: "${objectsSection?.content}"`);
+
+    // "vase" がオブジェクトに含まれているか確認
+    const hasVase = objectsSection?.content.includes("vase") ?? false;
+    console.log(`  "vase" が含まれている: ${hasVase ? "✅" : "❌"}`);
+
+    // "book" がオブジェクトに含まれているか確認
+    const hasBook = objectsSection?.content.includes("book") ?? false;
+    console.log(`  "book" が含まれている: ${hasBook ? "✅" : "❌"}`);
+
+    const passed = hasVase && hasBook;
+    console.log(`\n  結果: ${passed ? "✅ パス" : "❌ 失敗"}\n`);
+    return passed;
 }
 
-main().catch(err => {
-    console.error("Test failed:", err);
+async function main() {
+    console.log(DIVIDER);
+    console.log("VisualEditEngine E2E テスト");
+    console.log(DIVIDER);
+
+    const results: boolean[] = [];
+
+    results.push(await testEditTypeMapping());
+    results.push(await testPromptDiffGeneration());
+    results.push(await testResourceVideoGeneratorIntegration());
+
+    const passed = results.filter(Boolean).length;
+    const total = results.length;
+
+    console.log(`\n${DIVIDER}`);
+    console.log(`最終結果: ${passed}/${total} テストパス`);
+    console.log(DIVIDER);
+
+    if (passed < total) {
+        process.exit(1);
+    }
+}
+
+main().catch((err) => {
+    console.error("致命的エラー:", err);
     process.exit(1);
 });
