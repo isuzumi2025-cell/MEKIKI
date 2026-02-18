@@ -1,0 +1,45 @@
+name: Orchestra Contract Check
+
+on:
+  push:
+    paths:
+      - "sitemap_pro/app/**"
+      - "sitemap_pro/scripts/**"
+      - "sitemap_pro/docs/openapi_v1.json"
+      - "sitemap_pro/docs/openapi_v1.yaml"
+      - "OCR/frontend/src/api/orchestraClient.generated.ts"
+      - "OCR/frontend/package.json"
+      - ".github/workflows/orchestra-contract-check.yml"
+  pull_request:
+    paths:
+      - "sitemap_pro/app/**"
+      - "sitemap_pro/scripts/**"
+      - "sitemap_pro/docs/openapi_v1.json"
+      - "sitemap_pro/docs/openapi_v1.yaml"
+      - "OCR/frontend/src/api/orchestraClient.generated.ts"
+      - "OCR/frontend/package.json"
+      - ".github/workflows/orchestra-contract-check.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  contract-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install backend dependencies
+        run: pip install -r sitemap_pro/requirements.txt
+
+      - name: Check OpenAPI artifacts
+        run: python sitemap_pro/scripts/check_openapi.py
+
+      - name: Check generated Orchestra frontend client
+        run: python sitemap_pro/scripts/export_orchestra_client_ts.py --check
