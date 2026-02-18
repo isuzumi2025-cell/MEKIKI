@@ -10,7 +10,7 @@
  */
 
 import { FlowForgeAgent } from "../src/lib/flowforge-agent.js";
-import type { HealthStatus, NudgeMessage, AgentStatus } from "../src/lib/flowforge-agent-types.js";
+import type { HealthStatus, NudgeMessage } from "../src/lib/flowforge-agent-types.js";
 
 // ─── CLI Argument Parsing ───────────────────────────
 

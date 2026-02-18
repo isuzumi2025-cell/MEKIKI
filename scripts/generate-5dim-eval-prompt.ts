@@ -36,10 +36,13 @@ interface ProjectSummary {
 // ─── Analysis ───────────────────────────────────────
 
 function countExports(content: string): Pick<ModuleStats, "exportedFunctions" | "exportedClasses" | "exportedInterfaces" | "exportedTypes"> {
-    const exportedFunctions = (content.match(/^export\s+(async\s+)?function\s+/gm) ?? []).length;
+    const exportedFunctions = (content.match(/^export\s+(async\s+)?function\s+/gm) ?? []).length
+        + (content.match(/^export\s+const\s+/gm) ?? []).length
+        + (content.match(/^export\s+default\s+/gm) ?? []).length;
     const exportedClasses = (content.match(/^export\s+class\s+/gm) ?? []).length;
     const exportedInterfaces = (content.match(/^export\s+interface\s+/gm) ?? []).length;
-    const exportedTypes = (content.match(/^export\s+type\s+/gm) ?? []).length;
+    const exportedTypes = (content.match(/^export\s+type\s+/gm) ?? []).length
+        + (content.match(/^export\s+enum\s+/gm) ?? []).length;
     return { exportedFunctions, exportedClasses, exportedInterfaces, exportedTypes };
 }
 
