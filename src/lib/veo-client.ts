@@ -38,6 +38,7 @@ export interface GenerateVideoOptions {
   prompt: string;
   model?: VeoModel;
   aspectRatio?: VeoAspectRatio;
+  resolution?: VeoResolution;
   negativePrompt?: string;
   image?: {
     imageBytes: string;
