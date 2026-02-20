@@ -28,6 +28,7 @@ export interface GenerationJobResult {
     editablePrompt: EditablePromptData;
     analysis?: AnalysisResult;
     videoResult?: VeoGenerationResult;
+    referenceImages?: VeoReferenceImage[];
     log: GenerationStep[];
     createdAt: string;
 }
@@ -223,7 +224,20 @@ export class ResourceVideoGenerator {
         const engine = new VisualEditEngine({
             geminiApiKey: process.env.GOOGLE_API_KEY ?? process.env.GEMINI_API_KEY ?? "",
         });
-        return engine.regenerateWithVisualReference(previousResult, instruction);
+
+        const editedJob = await engine.regenerateWithVisualReference(previousResult, instruction);
+
+        const referenceType = engine.mapEditTypeToReferenceType(instruction.editType);
+        const referenceImages: VeoReferenceImage[] = [{
+            imageBytes: instruction.referenceImageBytes,
+            mimeType: instruction.referenceImageMimeType,
+            referenceType,
+        }];
+
+        return {
+            ...editedJob,
+            referenceImages,
+        };
     }
 
     private buildFailedResult(

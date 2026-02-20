@@ -11,6 +11,7 @@
 
 import { z } from "zod";
 import { LRUCache } from "./resilience.js";
+import type { GenerationJobResult } from "./resource-video-generator.js";
 
 // ============================================================
 // Zod Schemas
@@ -25,6 +26,11 @@ export const SubjectTypeSchema = z.enum([
 ]);
 
 export type SubjectType = z.infer<typeof SubjectTypeSchema>;
+
+export interface SimilarityMatch {
+    subject: Subject;
+    score: number;
+}
 
 export const SubjectSchema = z.object({
     id: z.string().uuid(),
@@ -333,6 +339,118 @@ export class SubjectRegistry {
         this.tagIndex.clear();
     }
 
+    // ── Jaccard Similarity ───────────────────────────────────
+
+    /**
+     * 2つのサブジェクトの keyFeatures を Jaccard 係数で比較する。
+     * |A ∩ B| / |A ∪ B| を返す。
+     */
+    computeSimilarity(a: Subject, b: Subject): number {
+        return computeJaccardSimilarity(a.keyFeatures, b.keyFeatures);
+    }
+
+    /**
+     * レジストリ内で類似サブジェクトを探す。
+     * threshold 以上のスコアを持つサブジェクトを降順で返す。
+     */
+    findSimilar(subject: Subject, threshold = 0.3): SimilarityMatch[] {
+        const matches: SimilarityMatch[] = [];
+
+        for (const candidate of this.getAllSubjects()) {
+            if (candidate.id === subject.id) continue;
+
+            const score = this.computeSimilarity(subject, candidate);
+            if (score >= threshold) {
+                matches.push({ subject: candidate, score });
+            }
+        }
+
+        matches.sort((a, b) => b.score - a.score);
+        return matches;
+    }
+
+    // ── Extract from Result ─────────────────────────────────
+
+    /**
+     * GenerationJobResult の editablePrompt からサブジェクト候補を抽出し、
+     * 重複しないものをレジストリに登録して返す。
+     */
+    extractFromResult(
+        result: GenerationJobResult,
+        cutId: string,
+    ): Subject[] {
+        const extracted: Subject[] = [];
+        const sections = result.editablePrompt.sections;
+
+        const charSection = sections.find(s => s.id === "characters");
+        if (charSection) {
+            const entries = charSection.content.split(";").map(s => s.trim()).filter(Boolean);
+            for (const entry of entries) {
+                const parts = entry.split(",").map(p => p.trim());
+                const name = parts[0] ?? entry;
+                const description = parts.slice(1).join(", ") || entry;
+                const keyFeatures = parts.filter(p => p.length > 0);
+
+                const candidate = this.registerIfNew({
+                    name,
+                    type: "character",
+                    description,
+                    keyFeatures: keyFeatures.length > 0 ? keyFeatures : [name],
+                    originCutId: cutId,
+                    carryover: true,
+                    tags: ["character", "extracted"],
+                });
+                if (candidate) extracted.push(candidate);
+            }
+        }
+
+        const objSection = sections.find(s => s.id === "objects");
+        if (objSection) {
+            const entries = objSection.content.split(";").map(s => s.trim()).filter(Boolean);
+            for (const entry of entries) {
+                const parts = entry.split(",").map(p => p.trim());
+                const name = parts[0] ?? entry;
+                const description = parts.slice(1).join(", ") || entry;
+                const keyFeatures = parts.filter(p => p.length > 0);
+
+                const candidate = this.registerIfNew({
+                    name,
+                    type: "object",
+                    description,
+                    keyFeatures: keyFeatures.length > 0 ? keyFeatures : [name],
+                    originCutId: cutId,
+                    carryover: true,
+                    tags: ["object", "extracted"],
+                });
+                if (candidate) extracted.push(candidate);
+            }
+        }
+
+        return extracted;
+    }
+
+    /**
+     * 類似サブジェクトが存在しなければ登録して返す。
+     * 既に類似 (Jaccard >= 0.5) が存在する場合は null。
+     */
+    private registerIfNew(input: SubjectCreateInput): Subject | null {
+        const tempSubject: Subject = {
+            ...input,
+            id: crypto.randomUUID(),
+            createdAt: new Date().toISOString(),
+        };
+
+        for (const existing of this.getAllSubjects()) {
+            const score = computeJaccardSimilarity(
+                existing.keyFeatures,
+                tempSubject.keyFeatures,
+            );
+            if (score >= 0.5) return null;
+        }
+
+        return this.register(input);
+    }
+
     // ── Serialization ───────────────────────────────────────
 
     /**
@@ -366,4 +484,25 @@ export class SubjectRegistry {
 
         return registry;
     }
+}
+
+// ============================================================
+// Jaccard Utility (exported for reuse in visual-edit-engine)
+// ============================================================
+
+export function computeJaccardSimilarity(a: string[], b: string[]): number {
+    if (a.length === 0 && b.length === 0) return 0;
+
+    const setA = new Set(a.map(f => f.toLowerCase()));
+    const setB = new Set(b.map(f => f.toLowerCase()));
+
+    let intersectionSize = 0;
+    for (const item of setA) {
+        if (setB.has(item)) intersectionSize++;
+    }
+
+    const unionSize = new Set([...setA, ...setB]).size;
+    if (unionSize === 0) return 0;
+
+    return intersectionSize / unionSize;
 }

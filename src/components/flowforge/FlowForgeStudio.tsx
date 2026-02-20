@@ -16,16 +16,22 @@ import { ToneMannerPanel } from "./ToneMannerPanel";
 import { TextProcessingPanel, type TextItem } from "./TextProcessingPanel";
 import { MotionGraphicsPanel, type MotionGraphicsItem } from "./MotionGraphicsPanel";
 import { GenerationProgress } from "./GenerationProgress";
+import { SubjectPanel } from "./SubjectPanel";
 import type { EditablePromptData, PromptSection } from "../../lib/editable-prompt";
 import type { GenerationJobResult } from "../../lib/resource-video-generator";
 import type { VisualEditInstruction } from "../../lib/visual-edit-engine";
 import type { CharacterDetail } from "../../lib/flow-prompt-builder";
+import type { Subject, SubjectCreateInput } from "../../lib/subject-registry";
 
-export type StudioTab = "prompt" | "resources" | "characters" | "tone" | "text" | "motion_graphics" | "visual_edit";
+export type StudioTab = "prompt" | "resources" | "characters" | "tone" | "text" | "motion_graphics" | "visual_edit" | "subjects";
 
 export interface FlowForgeStudioProps {
     onGenerate?: (prompt: EditablePromptData) => void;
     onVisualEdit?: (instruction: VisualEditInstruction) => void;
+    onSubjectRegister?: (input: SubjectCreateInput) => void;
+    onSubjectDelete?: (id: string) => void;
+    onSubjectToggleCarryover?: (id: string, carryover: boolean) => void;
+    subjects?: Subject[];
     generationResult?: GenerationJobResult;
     isGenerating?: boolean;
     progressMessage?: string;
@@ -34,6 +40,10 @@ export interface FlowForgeStudioProps {
 export const FlowForgeStudio: React.FC<FlowForgeStudioProps> = ({
     onGenerate,
     onVisualEdit,
+    onSubjectRegister,
+    onSubjectDelete,
+    onSubjectToggleCarryover,
+    subjects = [],
     generationResult,
     isGenerating = false,
     progressMessage,
@@ -71,6 +81,7 @@ export const FlowForgeStudio: React.FC<FlowForgeStudioProps> = ({
         { key: "text", label: "テキスト処理" },
         { key: "motion_graphics", label: "MG" },
         { key: "visual_edit", label: "画像参照修正" },
+        { key: "subjects", label: "サブジェクト" },
     ];
 
     return (
@@ -143,6 +154,15 @@ export const FlowForgeStudio: React.FC<FlowForgeStudioProps> = ({
                     <VisualEditPanel
                         previousResult={generationResult}
                         onEdit={onVisualEdit}
+                    />
+                )}
+
+                {activeTab === "subjects" && (
+                    <SubjectPanel
+                        subjects={subjects}
+                        onRegister={onSubjectRegister}
+                        onDelete={onSubjectDelete}
+                        onToggleCarryover={onSubjectToggleCarryover}
                     />
                 )}
             </main>

@@ -314,7 +314,7 @@ export class VeoClient {
     const mapping: Record<ReferenceImageType, VideoGenerationReferenceType> = {
       asset: VideoGenerationReferenceType.ASSET,
       style: VideoGenerationReferenceType.STYLE,
-      subject: VideoGenerationReferenceType.ASSET,
+      subject: VideoGenerationReferenceType.STYLE,
     };
     return mapping[type];
   }
