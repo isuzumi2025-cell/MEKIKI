@@ -12,6 +12,7 @@ import {
     SubjectTypeSchema,
     buildCarryoverPromptBlock,
     extractSubjectCandidatesFromText,
+    computeJaccardSimilarity,
     type Subject,
     type SubjectCreateInput,
 } from "../subject-registry.js";
@@ -255,15 +256,222 @@ describe("SubjectRegistry", () => {
     });
 
     it("fromJSON skips invalid entries", () => {
-        const invalid = [
-            { id: "not-a-uuid", name: "" },
-            ...registry.register(makeCharacter()) ? [registry.toJSON()[0]] : [],
-        ];
-
         registry.register(makeCharacter());
         const json = registry.toJSON();
         const restored = SubjectRegistry.fromJSON([{ bad: true }, ...json]);
         expect(restored.size).toBe(1);
+    });
+
+    // ── Jaccard Similarity ──────────────────────────────────
+
+    it("computeSimilarity returns 1.0 for identical keyFeatures", () => {
+        const a = registry.register(makeCharacter({ keyFeatures: ["red", "hat", "dress"] }));
+        const b = registry.register(makeCharacter({
+            name: "別のキャラ",
+            keyFeatures: ["red", "hat", "dress"],
+        }));
+        expect(registry.computeSimilarity(a, b)).toBe(1.0);
+    });
+
+    it("computeSimilarity returns 0 for disjoint keyFeatures", () => {
+        const a = registry.register(makeCharacter({ keyFeatures: ["red", "hat"] }));
+        const b = registry.register(makeAnimal({ keyFeatures: ["blue", "fur"] }));
+        expect(registry.computeSimilarity(a, b)).toBe(0);
+    });
+
+    it("computeSimilarity returns partial score for overlapping features", () => {
+        const a = registry.register(makeCharacter({ keyFeatures: ["red", "hat", "dress"] }));
+        const b = registry.register(makeCharacter({
+            name: "赤い服の少年",
+            keyFeatures: ["red", "shirt", "dress"],
+        }));
+        const score = registry.computeSimilarity(a, b);
+        expect(score).toBeGreaterThan(0);
+        expect(score).toBeLessThan(1);
+        expect(score).toBeCloseTo(0.5, 1);
+    });
+
+    // ── findSimilar ─────────────────────────────────────────
+
+    it("findSimilar returns matches above threshold", () => {
+        const hero = registry.register(makeCharacter({
+            keyFeatures: ["red hat", "black hair", "white dress"],
+        }));
+        registry.register(makeCharacter({
+            name: "赤い服の少年",
+            keyFeatures: ["red hat", "brown hair", "white dress"],
+        }));
+        registry.register(makeAnimal({ keyFeatures: ["white fur", "blue eyes"] }));
+
+        const matches = registry.findSimilar(hero, 0.3);
+        expect(matches.length).toBe(1);
+        expect(matches[0].subject.name).toBe("赤い服の少年");
+        expect(matches[0].score).toBeGreaterThan(0.3);
+    });
+
+    it("findSimilar returns empty for no matches above threshold", () => {
+        const hero = registry.register(makeCharacter({
+            keyFeatures: ["unique", "feature", "set"],
+        }));
+        registry.register(makeAnimal({ keyFeatures: ["completely", "different"] }));
+
+        const matches = registry.findSimilar(hero, 0.5);
+        expect(matches.length).toBe(0);
+    });
+
+    it("findSimilar excludes the subject itself", () => {
+        const hero = registry.register(makeCharacter({
+            keyFeatures: ["red hat", "black hair"],
+        }));
+
+        const matches = registry.findSimilar(hero, 0.0);
+        const ids = matches.map(m => m.subject.id);
+        expect(ids).not.toContain(hero.id);
+    });
+
+    // ── extractFromResult ───────────────────────────────────
+
+    it("extracts characters from GenerationJobResult", () => {
+        const result = {
+            status: "ready" as const,
+            mode: "text_to_video" as const,
+            finalPrompt: "test",
+            editablePrompt: {
+                sections: [
+                    {
+                        id: "characters",
+                        label: "登場人物",
+                        content: "赤い帽子の少女, 長い黒髪, 白いワンピース; 白い猫, 青い目",
+                        source: "analysis" as const,
+                        modified: false,
+                    },
+                ],
+                combinedPrompt: "test",
+                updatedAt: new Date().toISOString(),
+            },
+            log: [],
+            createdAt: new Date().toISOString(),
+        };
+
+        const extracted = registry.extractFromResult(result, "cut-001");
+        expect(extracted.length).toBe(2);
+        expect(extracted[0].type).toBe("character");
+        expect(extracted[0].tags).toContain("extracted");
+    });
+
+    it("extracts objects from GenerationJobResult", () => {
+        const result = {
+            status: "ready" as const,
+            mode: "text_to_video" as const,
+            finalPrompt: "test",
+            editablePrompt: {
+                sections: [
+                    {
+                        id: "objects",
+                        label: "小道具・物体",
+                        content: "赤い車, 光沢ある; 古い橋",
+                        source: "analysis" as const,
+                        modified: false,
+                    },
+                ],
+                combinedPrompt: "test",
+                updatedAt: new Date().toISOString(),
+            },
+            log: [],
+            createdAt: new Date().toISOString(),
+        };
+
+        const extracted = registry.extractFromResult(result, "cut-002");
+        expect(extracted.length).toBe(2);
+        expect(extracted[0].type).toBe("object");
+    });
+
+    it("extractFromResult skips duplicates (Jaccard >= 0.5)", () => {
+        registry.register(makeCharacter({
+            keyFeatures: ["赤い帽子の少女", "長い黒髪", "白いワンピース"],
+        }));
+
+        const result = {
+            status: "ready" as const,
+            mode: "text_to_video" as const,
+            finalPrompt: "test",
+            editablePrompt: {
+                sections: [
+                    {
+                        id: "characters",
+                        label: "登場人物",
+                        content: "赤い帽子の少女, 長い黒髪, 白いワンピース",
+                        source: "analysis" as const,
+                        modified: false,
+                    },
+                ],
+                combinedPrompt: "test",
+                updatedAt: new Date().toISOString(),
+            },
+            log: [],
+            createdAt: new Date().toISOString(),
+        };
+
+        const extracted = registry.extractFromResult(result, "cut-003");
+        expect(extracted.length).toBe(0);
+    });
+
+    it("extractFromResult returns empty for no character/object sections", () => {
+        const result = {
+            status: "ready" as const,
+            mode: "text_to_video" as const,
+            finalPrompt: "test",
+            editablePrompt: {
+                sections: [
+                    {
+                        id: "scene",
+                        label: "シーン記述",
+                        content: "A beautiful sunset",
+                        source: "analysis" as const,
+                        modified: false,
+                    },
+                ],
+                combinedPrompt: "test",
+                updatedAt: new Date().toISOString(),
+            },
+            log: [],
+            createdAt: new Date().toISOString(),
+        };
+
+        const extracted = registry.extractFromResult(result, "cut-004");
+        expect(extracted.length).toBe(0);
+    });
+});
+
+// ============================================================
+// computeJaccardSimilarity
+// ============================================================
+
+describe("computeJaccardSimilarity", () => {
+    it("returns 1.0 for identical arrays", () => {
+        expect(computeJaccardSimilarity(["a", "b", "c"], ["a", "b", "c"])).toBe(1.0);
+    });
+
+    it("returns 0 for disjoint arrays", () => {
+        expect(computeJaccardSimilarity(["a", "b"], ["c", "d"])).toBe(0);
+    });
+
+    it("returns 0 for two empty arrays", () => {
+        expect(computeJaccardSimilarity([], [])).toBe(0);
+    });
+
+    it("returns correct score for partial overlap", () => {
+        const score = computeJaccardSimilarity(["a", "b", "c"], ["b", "c", "d"]);
+        expect(score).toBeCloseTo(0.5, 1);
+    });
+
+    it("is case-insensitive", () => {
+        expect(computeJaccardSimilarity(["Red", "Hat"], ["red", "hat"])).toBe(1.0);
+    });
+
+    it("handles one empty array", () => {
+        expect(computeJaccardSimilarity(["a"], [])).toBe(0);
+        expect(computeJaccardSimilarity([], ["a"])).toBe(0);
     });
 });
 

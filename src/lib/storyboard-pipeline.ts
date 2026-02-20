@@ -25,6 +25,10 @@ import {
     FlowPromptBuilder,
     type FlowShot,
 } from "./flow-prompt-builder";
+import {
+    SubjectRegistry,
+} from "./subject-registry";
+import type { VeoReferenceImage } from "./veo-client";
 
 // ============================================================
 // Types
@@ -56,6 +60,10 @@ export interface StoryboardPipelineOptions {
     onProgress?: (shotIndex: number, total: number, step: string) => void;
     /** 動画ダウンロード先ディレクトリ */
     outputDir?: string;
+    /** サブジェクトレジストリ（ショット間持ち越し用） */
+    subjectRegistry?: SubjectRegistry;
+    /** 参照画像（全ショットに適用） */
+    referenceImages?: VeoReferenceImage[];
 }
 
 /**
@@ -89,10 +97,12 @@ export interface StoryboardResult {
 export class StoryboardPipeline {
     private imageClient: ImageGenClient;
     private veoClient: VeoClient;
+    private subjectRegistry: SubjectRegistry | null;
 
-    constructor(options?: { apiKey?: string }) {
+    constructor(options?: { apiKey?: string; subjectRegistry?: SubjectRegistry }) {
         this.imageClient = new ImageGenClient({ apiKey: options?.apiKey });
         this.veoClient = new VeoClient({ apiKey: options?.apiKey });
+        this.subjectRegistry = options?.subjectRegistry ?? null;
     }
 
     /**
@@ -175,7 +185,8 @@ export class StoryboardPipeline {
         const shotStart = Date.now();
 
         // Step 1: プロンプト構築
-        const prompt = this.buildPromptForShot(shot, storyboard.globalStyle);
+        const effectiveRegistry = options?.subjectRegistry ?? this.subjectRegistry ?? undefined;
+        const prompt = this.buildPromptForShot(shot, storyboard.globalStyle, effectiveRegistry);
         options?.onProgress?.(shotIndex, storyboard.shots.length, "prompt_built");
 
         // Step 2: コンテ画像生成
@@ -210,7 +221,10 @@ export class StoryboardPipeline {
                 image.imageBytes,
                 image.mimeType,
                 prompt,
-                { aspectRatio: aspectRatio as VeoAspectRatio },
+                {
+                    aspectRatio: aspectRatio as VeoAspectRatio,
+                    referenceImages: options?.referenceImages,
+                },
             );
 
             if (videoResult.status === "failed") {
@@ -276,7 +290,11 @@ export class StoryboardPipeline {
     /**
      * FlowShot からプロンプトテキストを組み立てる
      */
-    private buildPromptForShot(shot: FlowShot, globalStyle?: string): string {
+    private buildPromptForShot(
+        shot: FlowShot,
+        globalStyle?: string,
+        registry?: SubjectRegistry,
+    ): string {
         const builder = new FlowPromptBuilder(shot.subject);
 
         if (shot.action) builder.setAction(shot.action);
@@ -306,7 +324,16 @@ export class StoryboardPipeline {
 
         if (shot.negativePrompt) builder.setNegativePrompt(shot.negativePrompt);
 
-        return builder.buildPrompt();
+        let prompt = builder.buildPrompt();
+
+        if (registry) {
+            const carryoverBlock = registry.buildCarryoverPrompt();
+            if (carryoverBlock) {
+                prompt = `${prompt}\n\n${carryoverBlock}`;
+            }
+        }
+
+        return prompt;
     }
 }
 

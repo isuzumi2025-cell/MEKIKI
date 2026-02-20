@@ -14,6 +14,7 @@ import { EditablePrompt, type EditablePromptData } from "./editable-prompt.js";
 import type { ObjectDetail } from "./flow-prompt-builder.js";
 import type { GenerationJobResult } from "./resource-video-generator.js";
 import type { ReferenceImageType } from "./veo-client.js";
+import { computeJaccardSimilarity } from "./subject-registry.js";
 
 export interface VisualEditInstruction {
     referenceImageBytes: string;
@@ -241,18 +242,43 @@ Return ONLY valid JSON, no markdown formatting.`;
         const pairs: [ObjectDetail, ObjectDetail][] = [];
         const normalizedTarget = targetElement.toLowerCase();
 
+        const scored: { target: ObjectDetail; score: number }[] = [];
+
         for (const target of targetObjects) {
             const normalizedName = target.name.toLowerCase();
             const normalizedDesc = target.description.toLowerCase();
 
-            if (
+            const nameMatch =
                 normalizedName.includes(normalizedTarget) ||
                 normalizedDesc.includes(normalizedTarget) ||
-                normalizedTarget.includes(normalizedName)
-            ) {
-                for (const ref of referenceObjects) {
-                    pairs.push([target, ref]);
-                }
+                normalizedTarget.includes(normalizedName);
+
+            if (nameMatch) {
+                scored.push({ target, score: 1.0 });
+                continue;
+            }
+
+            const targetFeatures = [
+                target.name,
+                target.description,
+                ...(target.keyFeatures ?? []),
+            ];
+            const refFeatures = [targetElement];
+            for (const ref of referenceObjects) {
+                refFeatures.push(ref.name, ref.description, ...(ref.keyFeatures ?? []));
+            }
+
+            const jaccard = computeJaccardSimilarity(targetFeatures, refFeatures);
+            if (jaccard >= 0.15) {
+                scored.push({ target, score: jaccard });
+            }
+        }
+
+        scored.sort((a, b) => b.score - a.score);
+
+        for (const { target } of scored) {
+            for (const ref of referenceObjects) {
+                pairs.push([target, ref]);
             }
         }
 
