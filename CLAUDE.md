@@ -1,6 +1,7 @@
 # MEKIKI Proofing System - Claude Code Context
 
-**Last Updated**: 2026-01-28
+**Last Updated**: 2026-02-23
+**Last Verified Against Code**: 2026-02-23 (Claude Code + Cursor Agent cross-check)
 **Purpose**: AgentOps SDK導入による開発・運用の高速化と手戻り最小化
 
 ---
@@ -72,7 +73,8 @@
 
 ```python
 DPI_SCALE = 300.0 / 72.0  # ≈ 4.166（PDF座標 → 画像座標）
-# unified_app.py L938, paragraph_detector.py で使用
+# 定義場所: unified_app.py L1420（ローカル定数として定義）
+# ※ engine_cloud.py には DPI_SCALE は存在しない（2026-02-23検証済み）
 ```
 
 **y_offset（縦連結対応）**:
@@ -100,22 +102,40 @@ DPI_SCALE = 300.0 / 72.0  # ≈ 4.166（PDF座標 → 画像座標）
 
 **問題**: 緩和パラメータ（`overlap 0.4`, `gap_y 80`）を使用すると、虚構のマッチ（Match:2）が発生し、精度が破綻する。
 
-**正しい設定（CHECKPOINT: Match=70）**:
+**正しい設定（CHECKPOINT: Match=70）— 2026-02-23 実コード検証済み**:
 
 ```python
-# app/core/engine_cloud.py（現在はハードコード）
-overlap_ratio > 0.6        # 厳格（0.4は禁止）
-left_diff < 30             # 厳格（50は禁止）
-threshold_y = max(base_size * 2.5, 50)  # 厳格
-font_size_tol: 2.5x / 2.0x  # 厳格
-gap_x > 15                 # 厳格（30は禁止）
+# app/core/engine_cloud.py _vertical_stack_clustering() ハードコード値
+
+# アライメント判定（X方向）
+overlap_ratio > 0.5        # ✅ 実値（旧ドキュメントの 0.6 は誤り）
+left_diff < 40             # ✅ 通常時（layout_similar 判定は < 20）
+# ※ is_layout_similar = (left_diff < 20 and width_diff < 50)
+# ※ is_aligned = overlap_ratio > 0.5 OR left_diff < 40 OR is_layout_similar
+
+# Y方向動的閾値（GPT戦略: 2.0-4.0x）
+y_multiplier = 4.0  # is_layout_similar の場合
+y_multiplier = 3.5  # is_both_template の場合
+y_multiplier = 3.0  # 通常の場合
+threshold_y = max(base_size * y_multiplier * template_bonus, 60)
+# ✅ 実値（旧ドキュメントの max(base_size*2.5, 50) は誤り）
+
+# X方向ギャップ
+gap_x_threshold = 30  # is_layout_similar の場合
+gap_x_threshold = 20  # 通常の場合
+# ✅ 実値（旧ドキュメントの > 15 は誤り）
+
+# フォントサイズ許容
+if current["avg_font_size"] > target["avg_font_size"] * 3.0: continue
+if target["avg_font_size"] > current["avg_font_size"] * 2.5: continue
 ```
 
 **禁止設定**:
 
 - ❌ `overlap_ratio 0.4`（緩すぎ）
 - ❌ `gap_y 80`（緩すぎ）
-- ❌ `gap_x 30`（緩すぎ）
+- ❌ `gap_x_threshold > 30`（緩すぎ）
+- ❌ `y_multiplier < 3.0` または `threshold_y < 60`（精度破綻）
 
 **復元方法**:
 
@@ -421,6 +441,44 @@ Copy-Item "backup_20260112_004423\engine_cloud.py" "OCR\app\core\engine_cloud.py
 # AI分析モード成功版を復元
 Copy-Item "backup_ParagraphSorted_SUCCESS_20260113\unified_app.py" "OCR\app\gui\unified_app.py" -Force
 ```
+
+---
+
+## 🐛 Bug Registry Protocol
+
+アクティブなバグは以下のファイルで管理する:
+
+`OCR/Vault/50_Logs/active_bug_registry_YYYYMMDD.md`
+
+**ルール**:
+
+1. コード変更前に必ずアクティブバグ一覧を確認する
+2. バグを修正したら「Active」→「Fixed」に移動し、日付とコミットを記録する
+3. 新バグを発見したら severity（CRITICAL/MAJOR/MEDIUM/LOW）付きで登録する
+4. **CLAUDE.md のパラメータ値は四半期ごとに実コードと照合する**
+5. CLAUDE.md と実コードに乖離が発生した場合 = CRITICAL 優先度で即時修正（B9クラス）
+
+**最終検証日**: 2026-02-23
+**検証者**: Cursor Agent + Claude Code クロスチェック
+
+---
+
+## 📋 Document Accuracy
+
+このドキュメントが最後に実コードと照合された日: **2026-02-23**
+
+このドキュメントの値が実コードと一致しない場合:
+
+1. **コードが正**: このドキュメントではなくコードを信頼する
+2. このドキュメントを即座に修正する（B9クラスのバグ）
+3. 乖離内容をバグレジストリに記録する
+
+**既知の修正履歴**:
+
+| 日付 | 修正内容 | 修正者 |
+|:---|:---|:---|
+| 2026-02-23 | Pitfall#3 クラスタリング値を実コードに合わせて修正（overlap/left_diff/threshold_y/gap_x） | Claude Code |
+| 2026-02-23 | Pitfall#2 DPI_SCALE の定義場所を `unified_app.py L1420` に訂正 | Claude Code |
 
 ---
 
