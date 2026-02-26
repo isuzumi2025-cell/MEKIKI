@@ -1,0 +1,30 @@
+{
+  "version": "1.0.0",
+  "description": "Default agent configuration for AgentOrchestra",
+  "agents": [
+    {
+      "name": "gemini-implementer",
+      "role": "implementer",
+      "backend": "gemini",
+      "supports": ["text", "code", "vision"]
+    },
+    {
+      "name": "grok-investigator",
+      "role": "investigator",
+      "backend": "grok",
+      "supports": ["text", "knowledge", "analysis"]
+    },
+    {
+      "name": "devin-implementer",
+      "role": "implementer",
+      "backend": "devin",
+      "supports": ["code", "automation"]
+    },
+    {
+      "name": "claude-verifier",
+      "role": "verifier",
+      "backend": "claude",
+      "supports": ["text", "code", "review"]
+    }
+  ]
+}
