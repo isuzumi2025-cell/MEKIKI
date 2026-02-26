@@ -1,0 +1,104 @@
+========================================================================================================================
+MEKIKI Coordinate Transform POC — Benchmark Report
+========================================================================================================================
+
+── Accuracy (round-trip mm → device px → mm) ──
+iPad Pro 12.9″                 | float64  | max_err=(5.68e-14, 5.68e-14) mm | mean=(1.23e-14, 1.22e-14) | p99=(5.68e-14, 5.68e-14) | max_rel=2.22e-16 | all<1e-06mm=YES
+iPad Pro 12.9″                 | float32  | max_err=(3.05e-05, 3.05e-05) mm | mean=(1.01e-05, 1.01e-05) | p99=(3.05e-05, 3.05e-05) | max_rel=1.19e-07 | all<1e-06mm=NO
+Hi-Res Monitor 4K              | float64  | max_err=(5.68e-14, 5.68e-14) mm | mean=(1.20e-14, 1.19e-14) | p99=(5.68e-14, 5.68e-14) | max_rel=2.22e-16 | all<1e-06mm=YES
+Hi-Res Monitor 4K              | float32  | max_err=(3.05e-05, 3.05e-05) mm | mean=(4.64e-06, 4.63e-06) | p99=(3.05e-05, 3.05e-05) | max_rel=1.04e-07 | all<1e-06mm=NO
+Printer A3 @300 DPI            | float64  | max_err=(5.68e-14, 5.68e-14) mm | mean=(9.94e-15, 9.84e-15) | p99=(5.68e-14, 5.68e-14) | max_rel=2.22e-16 | all<1e-06mm=YES
+Printer A3 @300 DPI            | float32  | max_err=(3.05e-05, 3.05e-05) mm | mean=(9.37e-06, 9.37e-06) | p99=(3.05e-05, 3.05e-05) | max_rel=1.19e-07 | all<1e-06mm=NO
+
+── Throughput ──
+iPad Pro 12.9″                 | scalar       | n=   10000 | elapsed=0.0946s | throughput=105,697 pts/s
+iPad Pro 12.9″                 | batch_f64    | n= 1000000 | elapsed=0.0176s | throughput=56,803,736 pts/s
+iPad Pro 12.9″                 | batch_f32    | n= 1000000 | elapsed=0.0131s | throughput=76,415,332 pts/s
+Hi-Res Monitor 4K              | scalar       | n=   10000 | elapsed=0.0947s | throughput=105,613 pts/s
+Hi-Res Monitor 4K              | batch_f64    | n= 1000000 | elapsed=0.0160s | throughput=62,402,146 pts/s
+Hi-Res Monitor 4K              | batch_f32    | n= 1000000 | elapsed=0.0158s | throughput=63,288,648 pts/s
+Printer A3 @300 DPI            | scalar       | n=   10000 | elapsed=0.0942s | throughput=106,138 pts/s
+Printer A3 @300 DPI            | batch_f64    | n= 1000000 | elapsed=0.0157s | throughput=63,781,433 pts/s
+Printer A3 @300 DPI            | batch_f32    | n= 1000000 | elapsed=0.0131s | throughput=76,392,052 pts/s
+
+── Floating-Point Precision Comparison ──
+iPad Pro 12.9″                 | py_float=5.68e-14 | np_f64=5.68e-14 | np_f32=3.05e-05 | f32/f64=536870912.0x
+Hi-Res Monitor 4K              | py_float=5.68e-14 | np_f64=5.68e-14 | np_f32=3.05e-05 | f32/f64=536870912.0x
+Printer A3 @300 DPI            | py_float=5.68e-14 | np_f64=5.68e-14 | np_f32=3.05e-05 | f32/f64=536870912.0x
+
+========================================================================================================================
+
+==================================================================================================================================
+MEKIKI Coordinate Transform POC — Boundary / Worst-Case Report
+==================================================================================================================================
+
+Overall: 36/48 passed
+
+
+── very_large_coords ──
+  [PASS] iPad Pro 12.9″                 float64  | max_err=0.00e+00 | mean_err=0.00e+00 | NaN=False Inf=False
+  [FAIL] iPad Pro 12.9″                 float32  | max_err=7.81e-03 | mean_err=3.91e-03 | NaN=False Inf=False | max_err 7.81e-03 >= threshold 1.00e-03
+  [PASS] Hi-Res Monitor 4K              float64  | max_err=1.46e-11 | mean_err=7.28e-12 | NaN=False Inf=False
+  [FAIL] Hi-Res Monitor 4K              float32  | max_err=7.81e-03 | mean_err=3.91e-03 | NaN=False Inf=False | max_err 7.81e-03 >= threshold 1.00e-03
+  [PASS] Printer A3 @300 DPI            float64  | max_err=0.00e+00 | mean_err=0.00e+00 | NaN=False Inf=False
+  [FAIL] Printer A3 @300 DPI            float32  | max_err=7.81e-03 | mean_err=3.91e-03 | NaN=False Inf=False | max_err 7.81e-03 >= threshold 1.00e-03
+
+── sub_micron_coords ──
+  [PASS] iPad Pro 12.9″                 float64  | max_err=1.97e-31 | mean_err=4.93e-32 | NaN=False Inf=False
+  [PASS] iPad Pro 12.9″                 float32  | max_err=1.11e-16 | mean_err=2.78e-17 | NaN=False Inf=False
+  [PASS] Hi-Res Monitor 4K              float64  | max_err=0.00e+00 | mean_err=0.00e+00 | NaN=False Inf=False
+  [PASS] Hi-Res Monitor 4K              float32  | max_err=0.00e+00 | mean_err=0.00e+00 | NaN=False Inf=False
+  [PASS] Printer A3 @300 DPI            float64  | max_err=0.00e+00 | mean_err=0.00e+00 | NaN=False Inf=False
+  [PASS] Printer A3 @300 DPI            float32  | max_err=1.06e-22 | mean_err=2.65e-23 | NaN=False Inf=False
+
+── near_zero_coords ──
+  [PASS] iPad Pro 12.9″                 float64  | max_err=0.00e+00 | mean_err=0.00e+00 | NaN=False Inf=False
+  [PASS] iPad Pro 12.9″                 float32  | max_err=2.12e-22 | mean_err=5.62e-23 | NaN=False Inf=False
+  [PASS] Hi-Res Monitor 4K              float64  | max_err=0.00e+00 | mean_err=0.00e+00 | NaN=False Inf=False
+  [PASS] Hi-Res Monitor 4K              float32  | max_err=0.00e+00 | mean_err=0.00e+00 | NaN=False Inf=False
+  [PASS] Printer A3 @300 DPI            float64  | max_err=0.00e+00 | mean_err=0.00e+00 | NaN=False Inf=False
+  [PASS] Printer A3 @300 DPI            float32  | max_err=0.00e+00 | mean_err=0.00e+00 | NaN=False Inf=False
+
+── negative_coords ──
+  [PASS] iPad Pro 12.9″                 float64  | max_err=2.17e-19 | mean_err=7.23e-20 | NaN=False Inf=False
+  [PASS] iPad Pro 12.9″                 float32  | max_err=0.00e+00 | mean_err=0.00e+00 | NaN=False Inf=False
+  [PASS] Hi-Res Monitor 4K              float64  | max_err=1.16e-10 | mean_err=3.88e-11 | NaN=False Inf=False
+  [FAIL] Hi-Res Monitor 4K              float32  | max_err=6.25e-02 | mean_err=2.08e-02 | NaN=False Inf=False | max_err 6.25e-02 >= threshold 1.00e-03
+  [PASS] Printer A3 @300 DPI            float64  | max_err=0.00e+00 | mean_err=0.00e+00 | NaN=False Inf=False
+  [FAIL] Printer A3 @300 DPI            float32  | max_err=6.25e-02 | mean_err=2.08e-02 | NaN=False Inf=False | max_err 6.25e-02 >= threshold 1.00e-03
+
+── max_float ──
+  [FAIL] iPad Pro 12.9″                 float64  | max_err=inf | mean_err=inf | NaN=True Inf=False | NaN detected in output
+  [FAIL] iPad Pro 12.9″                 float32  | max_err=inf | mean_err=inf | NaN=True Inf=False | NaN detected in output
+  [FAIL] Hi-Res Monitor 4K              float64  | max_err=inf | mean_err=inf | NaN=True Inf=False | NaN detected in output
+  [FAIL] Hi-Res Monitor 4K              float32  | max_err=inf | mean_err=inf | NaN=True Inf=False | NaN detected in output
+  [FAIL] Printer A3 @300 DPI            float64  | max_err=inf | mean_err=inf | NaN=True Inf=False | NaN detected in output
+  [FAIL] Printer A3 @300 DPI            float32  | max_err=inf | mean_err=inf | NaN=True Inf=False | NaN detected in output
+
+── mixed_magnitude ──
+  [PASS] iPad Pro 12.9″                 float64  | max_err=5.68e-14 | mean_err=7.11e-15 | NaN=False Inf=False
+  [PASS] iPad Pro 12.9″                 float32  | max_err=6.94e-18 | mean_err=1.73e-18 | NaN=False Inf=False
+  [PASS] Hi-Res Monitor 4K              float64  | max_err=1.29e-26 | mean_err=3.23e-27 | NaN=False Inf=False
+  [PASS] Hi-Res Monitor 4K              float32  | max_err=3.05e-05 | mean_err=3.81e-06 | NaN=False Inf=False
+  [PASS] Printer A3 @300 DPI            float64  | max_err=1.29e-26 | mean_err=3.23e-27 | NaN=False Inf=False
+  [FAIL] Printer A3 @300 DPI            float32  | max_err=1.02e+03 | mean_err=2.56e+02 | NaN=False Inf=False | max_err 1.02e+03 >= threshold 1.00e+00
+
+── typical_print ──
+  [PASS] iPad Pro 12.9″                 float64  | max_err=5.68e-14 | mean_err=9.95e-15 | NaN=False Inf=False
+  [PASS] iPad Pro 12.9″                 float32  | max_err=0.00e+00 | mean_err=0.00e+00 | NaN=False Inf=False
+  [PASS] Hi-Res Monitor 4K              float64  | max_err=0.00e+00 | mean_err=0.00e+00 | NaN=False Inf=False
+  [PASS] Hi-Res Monitor 4K              float32  | max_err=3.05e-05 | mean_err=5.35e-06 | NaN=False Inf=False
+  [PASS] Printer A3 @300 DPI            float64  | max_err=5.55e-17 | mean_err=1.11e-17 | NaN=False Inf=False
+  [PASS] Printer A3 @300 DPI            float32  | max_err=0.00e+00 | mean_err=0.00e+00 | NaN=False Inf=False
+
+── dpr_stress ──
+  [PASS] iPad Pro 12.9″                 float64  | max_err=2.22e-16 | mean_err=2.78e-17 | NaN=False Inf=False
+  [PASS] iPad Pro 12.9″                 float32  | max_err=2.38e-07 | mean_err=7.08e-08 | NaN=False Inf=False
+  [PASS] Hi-Res Monitor 4K              float64  | max_err=2.22e-16 | mean_err=5.55e-17 | NaN=False Inf=False
+  [PASS] Hi-Res Monitor 4K              float32  | max_err=1.19e-07 | mean_err=1.49e-08 | NaN=False Inf=False
+  [PASS] Printer A3 @300 DPI            float64  | max_err=4.44e-16 | mean_err=1.60e-16 | NaN=False Inf=False
+  [PASS] Printer A3 @300 DPI            float32  | max_err=2.38e-07 | mean_err=4.47e-08 | NaN=False Inf=False
+
+==================================================================================================================================
+
+Total benchmark time: 1.28 s
