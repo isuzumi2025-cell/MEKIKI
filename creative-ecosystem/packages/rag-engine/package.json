@@ -1,0 +1,22 @@
+{
+  "name": "@icc/rag-engine",
+  "version": "0.1.0",
+  "description": "RAG engine for ICC — ObsidianVault search + embedding indexing",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@icc/ai-client": "workspace:*",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.8",
+    "@types/node": "^22.0.0"
+  }
+}
