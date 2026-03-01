@@ -1,79 +1,78 @@
-# Plan Contract Template
+# Plan Contract v2
 
-**Purpose**: Standard format for implementation plans
+Status: Active  
+Last Updated: 2026-02-11
 
-## Structure
+## 1. Goal
 
-### 1. Summary
+Standardize how autonomous tasks are planned, approved, executed, and verified.
 
-**Objective**: [What needs to be achieved]
+## 2. Required Plan Fields
 
-**Scope**: [What is included/excluded]
+1. Objective
+2. Scope (in/out)
+3. Deliverables (files and expected change size)
+4. Acceptance criteria
+5. Risk class: LOW, MEDIUM, HIGH
+6. Security controls for the selected risk class
+7. Test and domain-check strategy
+8. Rollback and recovery plan (non-destructive)
+9. Approval requirements
 
-**Estimated Effort**: [Number of files, LOC estimate]
+## 3. Deliverables Template
 
-### 2. Deliverables
+| # | File | Change Type | LOC Estimate | Risk |
+|:--:|:--|:--|:--:|:--:|
+| 1 | `path/to/file` | modify/new/delete | ~N | L/M/H |
 
-| # | File | Type | LOC Estimate |
-|:---:|:---|:---|:---:|
-| 1 | `path/to/file.py` | Modified | ~50 |
-| 2 | `path/to/test.py` | New | ~80 |
+## 4. Security Control Mapping
 
-**Total**: X files, ~Y LOC
+### LOW
 
-### 3. Acceptance Criteria
+- Verifier check
+- Basic tests for impacted area
 
-- ✅ AC-XXX-1: [Specific, measurable criterion]
-- ✅ AC-XXX-2: [Specific, measurable criterion]
-- ✅ AC-XXX-3: [Specific, measurable criterion]
+### MEDIUM
 
-### 4. Risks
+- Verifier check
+- Domain checks
+- Security checklist
+- Human review before protected merge
 
-| Risk | Probability | Impact | Mitigation |
-|:---|:---:|:---:|:---|
-| ID整合性破綻 | 🔴 High | 🔴 Critical | /audit-ids を必ず実行 |
-| 座標系ズレ | 🟡 Medium | 🔴 Critical | /audit-coords で検証 |
+### HIGH
 
-### 5. Testing Strategy
+- All MEDIUM controls
+- Two-person approval
+- Incident rollback drill readiness
+- Explicit secrets and token impact review
 
-**Unit Tests**:
-- [ ] `test_xxx.py`: Test case descriptions
+## 5. Rollback Requirements
 
-**Domain Checks**:
-- [ ] `/audit-ids`: ID整合性
-- [ ] `/audit-coords`: 座標検証
+Allowed rollback paths:
 
-**E2E Test**:
-- [ ] 1 Web + 1 PDF シナリオ
+1. `git revert` targeted commits
+2. Restore selected files from known-good branch or tag
+3. Recovery branch with clean cherry-picks
 
-### 6. Rollback Plan
+Disallowed as default:
 
-**Backup**:
-```bash
-mkdir backup_TaskXXX_YYYYMMDD
-Copy-Item OCR\app\... backup_TaskXXX_YYYYMMDD\ -Force
-```
+- `git reset --hard`
+- History rewrites on protected branches
 
-**Restore**:
-```bash
-Copy-Item backup_TaskXXX_YYYYMMDD\*.py OCR\app\... -Force
-```
+## 6. Approval Matrix
 
-**Git Tag**:
-```bash
-git tag task-xxx-complete
-```
+| Risk | Planner | Verifier | Human Approver |
+|:--|:--:|:--:|:--:|
+| LOW | Required | Required | Optional |
+| MEDIUM | Required | Required | Required |
+| HIGH | Required | Required | Required (2+) |
 
-### 7. Approval
+## 7. Definition of Plan Complete
 
-- [ ] Plan reviewed by user
-- [ ] Acceptance criteria agreed
-- [ ] Risks acknowledged
-- [ ] Rollback plan confirmed
+A plan is complete when:
 
-**Approved by**: [User name]
-**Date**: [YYYY-MM-DD]
+1. Required fields are fully specified.
+2. Risk class and controls are consistent.
+3. Verification strategy is executable.
+4. Approval path is explicit.
 
----
-
-**Status**: Phase 0 定義完了、Phase 1以降で使用

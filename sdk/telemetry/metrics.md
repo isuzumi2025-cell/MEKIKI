@@ -1,140 +1,74 @@
-# Telemetry Metrics
+# Telemetry Metrics v2
 
-**Purpose**: KPI定義と測定方法
+Status: Active  
+Last Updated: 2026-02-11
 
-## Core KPIs
+## 1. Objective
 
-### 1. Round Trip Count (往復回数)
+Track quality, security, and delivery health for autonomous orchestration.
 
-**Definition**: Plan承認 → 実装 → 検証 → 修正 のサイクル数
+## 2. Core Delivery Metrics
 
-**Target**: ≤3 回
+1. Round trips per task  
+Target: <= 3
 
-**Measurement**:
-```
-round_trips = count(state_transitions where status changed from "in_progress" to "blocked" or "failed")
-```
+2. Diff size per file  
+Target: <= 100 LOC
 
-**Tracking**:
-- Task開始時刻
-- 各状態遷移時刻
-- 完了時刻
+3. Test failure rate  
+Target: <= 10%
 
-### 2. Diff Size per File (差分量)
+4. Lead time from ready -> completed  
+Target: team-defined by work type
 
-**Definition**: 1ファイルあたりの変更行数（追加+削除）
+## 3. Security Metrics
 
-**Target**: ≤100 LOC
+1. Policy gate pass rate  
+Target: 100%
 
-**Measurement**:
-```bash
-git diff --stat HEAD~1 | awk '{if ($NF == "file") print $(NF-2)}'
-```
+2. Secret leak incidents  
+Target: 0
 
-**Tracking**:
-- ファイルパス
-- 追加行数
-- 削除行数
-- 合計差分
+3. Quarantine trigger count  
+Target: near 0, investigated on every occurrence
 
-### 3. Test Failure Rate (テスト失敗率)
+4. Mean time to contain (MTTC) incident  
+Target: < 30 minutes
 
-**Definition**: 失敗したテスト数 / 全テスト数
+5. Mean time to recover (MTTR) incident  
+Target: < 4 hours
 
-**Target**: ≤10%
+## 4. Domain Integrity Metrics
 
-**Measurement**:
-```bash
-pytest OCR/tests/ --json-report --json-report-file=report.json
-# Parse report.json for pass/fail counts
-```
+1. ID integrity pass rate  
+Target: 100%
 
-**Tracking**:
-- Total tests
-- Passed tests
-- Failed tests
-- Failure rate
+2. Coordinate accuracy  
+Target: average error <= 2px
 
-## Domain-Specific Metrics
+3. Match quality baseline compliance  
+Target: agreed baseline maintained
 
-### 4. ID Integrity Score
+## 5. Required Event Payload
 
-**Definition**: ID整合性チェックのPASS率
+Each orchestrated task event should include:
 
-**Target**: 100%
+1. task_id
+2. risk_class
+3. actor_role
+4. state_from
+5. state_to
+6. touched_files_count
+7. tests_passed_count
+8. tests_failed_count
+9. security_check_status
+10. approval_count
+11. incident_flag
+12. timestamp
 
-**Measurement**:
-```bash
-python OCR/scripts/audit_ids.py --format=json
-# Parse JSON for error count
-```
+## 6. Reporting Cadence
 
-**Tracking**:
-- Total checks
-- Passed checks
-- Failed checks
-- Pass rate
+1. Daily: delivery + security snapshot
+2. Weekly: trend and anomaly review
+3. Monthly: game-day drill outcome and control updates
 
-### 5. Match Quality Score
-
-**Definition**: マッチング品質の総合スコア
-
-**Target**: Match数≥70、虚構マッチ0件
-
-**Measurement**:
-```bash
-python OCR/scripts/audit_match_quality.py --format=json
-# Parse JSON for match count, virtual matches
-```
-
-**Tracking**:
-- Match count
-- Virtual match count
-- Average similarity score
-- Score distribution
-
-### 6. Coordinate Accuracy
-
-**Definition**: 座標変換の平均誤差
-
-**Target**: ≤2px
-
-**Measurement**:
-```bash
-python OCR/scripts/audit_coords.py --format=json
-# Parse JSON for avg_error
-```
-
-**Tracking**:
-- Average error (px)
-- Max error (px)
-- Error distribution
-
-## Reporting
-
-### Daily Report
-
-```
-Date: YYYY-MM-DD
-
-Round Trips: X (target: ≤3)
-Diff Size: Y LOC/file (target: ≤100)
-Test Failure Rate: Z% (target: ≤10%)
-
-ID Integrity: 100% ✅
-Match Quality: 70 matches ✅
-Coordinate Accuracy: 1.2px ✅
-
-Status: ✅ ALL TARGETS MET
-```
-
-### Weekly Trend
-
-- Plot round trip trend
-- Plot diff size trend
-- Plot test failure rate trend
-- Identify anomalies
-
----
-
-**Status**: Phase 0 定義完了、Phase 2以降で実装

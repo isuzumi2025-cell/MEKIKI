@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "creative-ecosystem"
+version = "0.1.0"
+description = "ICC - Integrated Creative Ecosystem (MEKIKI + FlowForge + Analytics + Vault + Sitemap)"
+requires-python = ">=3.11"
+
+[tool.uv.workspace]
+members = [
+    "apps/backend",
+    "packages/ai-client-python",
+    "packages/rag-engine",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["apps/backend/tests", "packages/ai-client-python/tests"]
+asyncio_mode = "auto"

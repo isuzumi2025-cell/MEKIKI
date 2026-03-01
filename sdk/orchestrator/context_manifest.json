@@ -1,0 +1,50 @@
+{
+  "version": "1.0.0",
+  "entrypoint": "ROOT_AUTONOMOUS_ORCHESTRA_SPEC.md",
+  "load_order": [
+    "ROOT_AUTONOMOUS_ORCHESTRA_SPEC.md",
+    "sdk/contracts/plan_contract.md",
+    "sdk/contracts/security_contract.md",
+    "sdk/contracts/acceptance_criteria.md",
+    "sdk/orchestrator/task_model.md",
+    "sdk/orchestrator/state_machine.md",
+    "sdk/orchestrator/security_playbook.md",
+    "sdk/telemetry/metrics.md",
+    ".claude/hooks/post_tool_use.md"
+  ],
+  "required_files": [
+    ".gitattributes",
+    "ROOT_AUTONOMOUS_ORCHESTRA_SPEC.md",
+    "sdk/contracts/plan_contract.md",
+    "sdk/contracts/security_contract.md",
+    "sdk/orchestrator/task_model.md",
+    "sdk/orchestrator/state_machine.md",
+    "sdk/orchestrator/security_playbook.md",
+    "sdk/telemetry/metrics.md",
+    ".claude/hooks/post_tool_use.md"
+  ],
+  "forbidden_patterns": [
+    {
+      "path": ".claude/hooks/post_tool_use.md",
+      "pattern": "(?im)^\\s*git\\s+reset\\s+--hard\\b",
+      "reason": "destructive rollback is disallowed by policy"
+    },
+    {
+      "path": ".claude/hooks/post_tool_use.md",
+      "pattern": "(?im)^\\s*git\\s+push\\s+--force\\b",
+      "reason": "history rewrite is disallowed for protected branches"
+    }
+  ],
+  "gitattributes_requirements": [
+    "* text=auto eol=lf",
+    "*.ps1 text eol=crlf",
+    "*.bat text eol=crlf",
+    "*.cmd text eol=crlf"
+  ],
+  "defaults": {
+    "risk_class": "MEDIUM",
+    "approvals_required_low": 1,
+    "approvals_required_medium": 1,
+    "approvals_required_high": 2
+  }
+}

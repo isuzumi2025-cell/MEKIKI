@@ -1,0 +1,43 @@
+name: Orchestra Governance Check
+
+on:
+  push:
+    paths:
+      - "ROOT_AUTONOMOUS_ORCHESTRA_SPEC.md"
+      - ".gitattributes"
+      - ".claude/hooks/post_tool_use.md"
+      - "sdk/contracts/**"
+      - "sdk/orchestrator/**"
+      - "sdk/telemetry/**"
+      - ".github/workflows/orchestra-governance-check.yml"
+  pull_request:
+    paths:
+      - "ROOT_AUTONOMOUS_ORCHESTRA_SPEC.md"
+      - ".gitattributes"
+      - ".claude/hooks/post_tool_use.md"
+      - "sdk/contracts/**"
+      - "sdk/orchestrator/**"
+      - "sdk/telemetry/**"
+      - ".github/workflows/orchestra-governance-check.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  governance-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate Context Manifest
+        run: python sdk/orchestrator/context_loader.py --mode check
+
+      - name: Run Policy Guard
+        run: python sdk/orchestrator/policy_guard.py
+
